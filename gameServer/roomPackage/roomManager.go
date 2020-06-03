@@ -70,17 +70,16 @@ func (roomMgr *RoomManager) PacketProcess(roomNumber int32, packet protocol.Pack
 	NetLib.NTELIB_LOG_DEBUG("[RoomManager - PacketProcess]", zap.Int16("PacketID", packet.ID))
 	isRoomEnterReq := false
 
-	if roomNumber == -1 && packet.ID == protocol.PACKET_ID_ROOM_ENTER_REQ {
+	if packet.ID == protocol.PACKET_ID_ROOM_ENTER_REQ {
 		isRoomEnterReq = true
 
 		var requestPacket protocol.RoomEnterRequestPacket
 		(&requestPacket).DecodingPacket(packet.Data)
 
-		roomNumber = requestPacket.RoomNumber
+		
+		//TODO: 클라이언트가 들어가고 싶은 Room번호로 요청했던 구조에서, 서버가 자동으로 배정하는 구조로 바뀌었으므로 기존의 패킷 구조와 맞지않아 수정하였는데, 이 부분에서 부작용이 없는지 테스트가 필요
 	}
 
-
-	//roomNumber정보가 고정으로 들어감
 
 	room := roomMgr.GetRoomByNumber(roomNumber)
 	NetLib.NTELIB_LOG_DEBUG("[RoomManager - PacketProcess]",zap.Int32("roomNumber",roomNumber), zap.Int32("room Struct's number",room.GetNumber()))

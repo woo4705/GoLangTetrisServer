@@ -8,7 +8,7 @@ import (
 	NetLib "gohipernetFake"
 )
 
-func (server *ChatServer) DistributePacket(sessionIndex int32, sessionUniqueID uint64, packetData []byte){
+func (server *GameServer) DistributePacket(sessionIndex int32, sessionUniqueID uint64, packetData []byte){
 	packetID := protocol.PeekPacketID(packetData)
 	bodySize, bodyData := protocol.PeekPacketBody(packetData)
 
@@ -29,7 +29,7 @@ func (server *ChatServer) DistributePacket(sessionIndex int32, sessionUniqueID u
 }
 
 
-func (server *ChatServer) PacketProcess_goroutine() {
+func (server *GameServer) PacketProcess_goroutine() {
 	NetLib.NTELIB_LOG_DEBUG("start PacketProcess goroutine")
 
 	for{
@@ -43,7 +43,7 @@ func (server *ChatServer) PacketProcess_goroutine() {
 }
 
 
-func (server *ChatServer) PacketProcess_goroutine_Impl() bool {
+func (server *GameServer) PacketProcess_goroutine_Impl() bool {
 	IsWantTermination := false
 	defer NetLib.PrintPanicStack()
 
@@ -56,12 +56,13 @@ func (server *ChatServer) PacketProcess_goroutine_Impl() bool {
 
 		if packet.ID == protocol.PACKET_ID_LOGIN_REQ {
 			ProcessPacketLogin(sessionIndex, sessionUniqueID, bodySize, bodyData)
+		}else if packet.ID == protocol.PACKET_ID_ROOM_ENTER_REQ {
+			ProcessRoomEnterRequest(server , sessionIndex , sessionUniqueID , bodyData, packet)
 		}else if packet.ID == protocol.PACKET_ID_SESSION_CLOSE_SYS {
 			ProcessPacketSesssionClosed(server, sessionIndex, sessionUniqueID)
 		}else {
 			roomNumber,_ := connectedSession.GetRoomNumber(sessionIndex)
 			server.RoomMgr.PacketProcess(roomNumber, packet)
-
 			//위에서 connectedSession에서 해당 세션이 연결된 방의 번호를 불러온다.
 
 		}
@@ -109,12 +110,42 @@ func SendLoginResult(sessionIndex int32, sessionUniqueID uint64, result int16){
 
 	NetLib.NetLibIPostSendToClient(sessionIndex, sessionUniqueID, sendPacket)
 	NetLib.NTELIB_LOG_DEBUG("SendLoginResult", zap.Int32("sessionIndex", sessionIndex), zap.Int16("result",result))
+}
+
+
+
+func ProcessRoomEnterRequest(server *GameServer, sessionIndex int32, sessionUniqueID uint64, bodyData []byte, packet protocol.Packet){
+	var reqPacket protocol.RoomEnterRequestPacket
+
+	NetLib.NTELIB_LOG_DEBUG("Process Room Enter Packet");
+
+
+	if (&reqPacket).DecodingPacket(bodyData) == false {
+		SendLoginResult(sessionIndex, sessionUniqueID, protocol.ERROR_CODE_PACKET_DECODING_FAIL)
+		return
+	}
+
+	roomUserCntList := server.RoomMgr.GetAllChannelUserCount()
+	roomMaxCnt := len(roomUserCntList)
+	enterRoomNum := -1
+
+
+	for i:=0; i<roomMaxCnt; i++ {
+		if roomUserCntList[i] < 2 {
+			enterRoomNum = i
+			break;
+		}
+	}
+
+	server.RoomMgr.PacketProcess(int32(enterRoomNum), packet)
+
 
 }
 
 
 
-func ProcessPacketSesssionClosed(server *ChatServer, sessionIndex int32, sessionUniqueID uint64){
+
+func ProcessPacketSesssionClosed(server *GameServer, sessionIndex int32, sessionUniqueID uint64){
 	roomNumber,_ := connectedSession.GetRoomNumber(sessionIndex)
 
 	if roomNumber > -1 {

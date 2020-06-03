@@ -64,22 +64,21 @@ func (packet LoginResponsePacket) EncodingPacket() ([]byte, int16) {
 
 // RoomEnter RequestPacket
 type RoomEnterRequestPacket struct {
-	RoomNumber int32
+
 }
 
 func (packet RoomEnterRequestPacket) EncodingPacket() ([]byte, int16) {
-	totalPacketSize := public_clientSessionHeaderSize + 4
+	totalPacketSize := public_clientSessionHeaderSize
 	sendBuf := make([]byte,totalPacketSize)
 
 	writer := NetLib.MakeWriter(sendBuf,true)
 	EncodingPacketHeader(&writer,totalPacketSize,PACKET_ID_ROOM_ENTER_REQ,0)
-	writer.WriteS32(packet.RoomNumber)
 
 	return sendBuf, totalPacketSize
 }
 
 func (packet *RoomEnterRequestPacket) DecodingPacket(bodyData []byte) bool{
-	bodySize := 4
+	bodySize := 0
 
 	NetLib.NTELIB_LOG_DEBUG("[roomEnterRequestPacket body size]", zap.Int32("bodySize)",int32(len(bodyData))))
 
@@ -87,11 +86,6 @@ func (packet *RoomEnterRequestPacket) DecodingPacket(bodyData []byte) bool{
 
 		return false
 	}
-
-	reader := NetLib.MakeReader(bodyData, true)
-	packet.RoomNumber,_ = reader.ReadS32()
-
-	NetLib.NTELIB_LOG_DEBUG("[roomEnterRequestPacket]", zap.Int32("RoomNumber",packet.RoomNumber))
 
 	return true
 }
@@ -313,11 +307,11 @@ func (packet *RoomChatNotifyPacket) Decoding(bodyData []byte) bool{
 
 
 //RoomRelayRequestPacket
-type RoomRelayRequestPakcet struct {
+type RoomRelayRequestPacket struct {
 	Data []byte
 }
 
-func (packet RoomRelayRequestPakcet) EncodingPacket(size int16) ([]byte, int16){
+func (packet RoomRelayRequestPacket) EncodingPacket(size int16) ([]byte, int16){
 	totalPacketSize := public_clientSessionHeaderSize + int16(len(packet.Data))
 	sendBuf := make([]byte,totalPacketSize)
 
@@ -328,7 +322,7 @@ func (packet RoomRelayRequestPakcet) EncodingPacket(size int16) ([]byte, int16){
 	return sendBuf, totalPacketSize
 }
 
-func (packet *RoomRelayRequestPakcet) Decoding(bodyData []byte) bool {
+func (packet *RoomRelayRequestPacket) Decoding(bodyData []byte) bool {
 	reader := NetLib.MakeReader(bodyData, true)
 	packet.Data = reader.ReadBytes(len(packet.Data))
 	return true

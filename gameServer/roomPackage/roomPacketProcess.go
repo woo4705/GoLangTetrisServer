@@ -28,6 +28,7 @@ func (room *BaseRoom) PacketProcess_EnterUser(inValidUser *RoomUser, packet prot
 	curTime := NetLib.NetLib_GetCurrnetUnixTime()
 	sessionIndex := packet.UserSessionIndex
 	sessionUniqueID := packet.UserSessionUniqueID
+	roomNumber := room.GetNumber()
 
 	NetLib.NTELIB_LOG_INFO("[Room PacketProcess EnterUser]")
 
@@ -36,7 +37,7 @@ func (room *BaseRoom) PacketProcess_EnterUser(inValidUser *RoomUser, packet prot
 
 	userID, ok := connectedSession.GetUserID(sessionIndex)
 	if ok == false {
-		SendRoomEnterResult(sessionIndex, sessionUniqueID, 0,0,protocol.ERROR_CODE_ENTER_ROOM_INVALID_USER_ID)
+		SendRoomEnterResult(sessionIndex, sessionUniqueID, -1,0, protocol.ERROR_CODE_ENTER_ROOM_INVALID_USER_ID)
 		return protocol.ERROR_CODE_ENTER_ROOM_INVALID_USER_ID
 	}
 
@@ -49,16 +50,16 @@ func (room *BaseRoom) PacketProcess_EnterUser(inValidUser *RoomUser, packet prot
 
 
 	if addResult != protocol.ERROR_CODE_NONE {
-		SendRoomEnterResult(sessionIndex, sessionUniqueID, 0,0, addResult)
+		SendRoomEnterResult(sessionIndex, sessionUniqueID, -1,0, addResult)
 		return addResult
 	}
 
 
-	NetLib.NTELIB_LOG_DEBUG("[Room.PacketProcess EnterUser] - requestPacket.RoomNumber:", zap.Int32("roomNumPacket",requestPacket.RoomNumber ))
+	NetLib.NTELIB_LOG_DEBUG("[Room.PacketProcess EnterUser] - requestPacket.RoomNumber:", zap.Int32("roomNumPacket",roomNumber ))
 	NetLib.NTELIB_LOG_DEBUG("[Room.PacketProcess EnterUser] - room.GetNumber():", zap.Int32("roomNumGetFunc", room.GetNumber() ))
 
-	if connectedSession.SetRoomNumber(sessionIndex, sessionUniqueID, requestPacket.RoomNumber, curTime) == false {
-		SendRoomEnterResult(sessionIndex, sessionUniqueID, 0, 0, protocol.ERROR_CODE_ENTER_ROOM_INVALID_SESSION_STATE)
+	if connectedSession.SetRoomNumber(sessionIndex, sessionUniqueID, roomNumber, curTime) == false {
+		SendRoomEnterResult(sessionIndex, sessionUniqueID, -1, 0, protocol.ERROR_CODE_ENTER_ROOM_INVALID_SESSION_STATE)
 		return protocol.ERROR_CODE_ENTER_ROOM_INVALID_SESSION_STATE
 	}
 
@@ -68,7 +69,6 @@ func (room *BaseRoom) PacketProcess_EnterUser(inValidUser *RoomUser, packet prot
 		room.SendUserInfoListPacket(newUser)
 	}
 
-	roomNumber := room.GetNumber()
 	SendRoomEnterResult(sessionIndex, sessionUniqueID, roomNumber, newUser.RoomUniqueID, protocol.ERROR_CODE_NONE)
 
 	return protocol.ERROR_CODE_NONE
