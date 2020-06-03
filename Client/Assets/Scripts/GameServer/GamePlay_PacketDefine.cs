@@ -18,24 +18,15 @@ namespace GameNetwork
         LOGIN_RES = 702,
                 
 
-        PACKET_ID_ROOM_ENTER_REQ = 721,
-        PACKET_ID_ROOM_ENTER_RES = 722,
-        PACKET_ID_ROOM_USER_LIST_NTF = 723,
-        PACKET_ID_ROOM_NEW_USER_NTF = 724,
+        ROOM_ENTER_REQ = 721,
+        ROOM_ENTER_RES = 722,
+        ROOM_USER_LIST_NTF = 723,
+        ROOM_NEW_USER_NTF = 724,
 
-
-        NewRoomReq = 203,
-        NewRoomRes = 204,
-
-        EnterRoomReq = 206,
-        EnterRoomRes = 207,
-
-        LeaveRoomReq = 209,
-        LeaveRoomRes = 210,
-
-        ChatRoomReq = 214,
-        ChatRoomRes = 215,
-        ChatRoomNtf = 216,
+        
+        ROOM_CHAT_REQ = 731,
+        ROOM_CHAT_RES = 732,
+        ROOM_CHAT_NTF = 733,
 
         RivalUserInfoNtf = 220,
 
@@ -114,81 +105,6 @@ namespace GameNetwork
         public SByte Type;
         public byte[] BodyData;
     }
-
-    
-    public class RoomEnterResPacket
-    {
-        public ERROR_CODE Result;
-        public string RivalUserID;
-        public bool FromBytes(byte[] bodyData)
-        {
-            Result = (ERROR_CODE)BitConverter.ToInt16(bodyData, 0);
-            RivalUserID = Encoding.ASCII.GetString(bodyData, 2, 21).Split('\0')[0];
-            Debug.Log("RivalUserID: "+ RivalUserID);
-
-            return true;
-        }
-    }
-
-
-    public class RoomLeaveReqPacket
-    {
-    }
-
-    public class RoomLeaveResPacket
-    {
-        public ERROR_CODE Result;
-
-        public bool FromBytes(byte[] bodyData)
-        {
-            Result = (ERROR_CODE)BitConverter.ToInt16(bodyData, 0);
-            return true;
-        }
-    }
-
-
-    public class RoomChatReqPacket
-    {
-        public string Message;
-
-        public byte[] ToBytes()
-        {
-            var message = new byte[PacketDataValue.MAX_CHAT_SIZE];
-            Encoding.Unicode.GetBytes(Message).CopyTo(message, 0);
-
-            List<byte> dataSource = new List<byte>();
-            dataSource.AddRange(message);
-
-            return dataSource.ToArray();
-        }
-    }
-
-
-    public class RoomChatResPacket
-    {
-        public ERROR_CODE Result;
-
-        public bool FromBytes(byte[] bodyData)
-        {
-            Result = (ERROR_CODE)BitConverter.ToInt16(bodyData, 0);
-            return true;
-        }
-    }
-
-    public class RoomChatNotPacket
-    {
-        public string UserID;
-        public string Message;
-
-        public bool FromBytes(byte[] bodyData)
-        {
-            UserID = Encoding.ASCII.GetString(bodyData, 0, 21).Split('\0')[0];
-            Message = Encoding.Unicode.GetString(bodyData, 21, 257).Split('\0')[0];
-
-            return true;
-        }
-    }
-
 
     public class GameStartRequestPacket {
     }

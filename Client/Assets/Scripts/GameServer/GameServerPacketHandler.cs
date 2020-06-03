@@ -17,13 +17,25 @@ namespace GameNetwork
                         break;
                     }
 
-                case PACKET_ID.EnterRoomRes:
+                case PACKET_ID.ROOM_ENTER_RES:
                     {
                         ProcessEnterRoomResponse(packet);
                         break;
                     }
 
-                case PACKET_ID.ChatRoomNtf:
+                case PACKET_ID.ROOM_USER_LIST_NTF:
+                    {
+                        ProcessRoomUserListNotify(packet);
+                        break;
+                    }
+                
+                case PACKET_ID.ROOM_NEW_USER_NTF:
+                    {
+                        ProcessRoomNewUserNotify(packet);
+                        break;
+                    }
+
+                case PACKET_ID.ROOM_CHAT_NTF:
                     {
                         ProcessChatRoomNotify(packet);
                         break;
@@ -71,7 +83,6 @@ namespace GameNetwork
             if (response.Result == ERROR_CODE.NONE)
             {
                 Debug.Log("로그인성공");
-                
             }
             else
             {
@@ -86,27 +97,35 @@ namespace GameNetwork
         
         static void ProcessEnterRoomResponse(PacketData packet)
         {
-            var response = new RoomEnterResPacket();
+            var response = LobbySceneManager.roomEnterRes;
             response.FromBytes(packet.BodyData);
-            LobbySceneManager.roomEnterRes.Result = response.Result;
-
-            if (response.Result == ERROR_CODE.NONE)
-            {
-                Debug.Log("방 입장성공");
-                GameNetworkServer.Instance.ClientStatus = GameNetworkServer.CLIENT_STATUS.ROOM;
-                GameNetworkServer.Instance.RivalID = response.RivalUserID;
-                LobbySceneManager.isWatingEnterRoomRes = false;
-            }
-            else
-            {
-                Debug.Log("방 입장실패");
-                if (LobbySceneManager.GetMatchedRooom() != -1)
-                {
-                    GameNetworkServer.Instance.RequestRoomEnter(LobbySceneManager.GetMatchedRooom());
-                }
-                
-            }
         }
+        
+        
+        
+        static void ProcessRoomUserListNotify(PacketData packet)
+        {
+            var notify = new RoomUserListNotifyPacket();
+            notify.FromBytes(packet.BodyData);
+            
+            // 테트리스 대전방에는 2명을 최대로 고정하는것 생각했기에, 하드코딩이 들어가있다.
+            Debug.Log("[ProcessRoomUserListNotify] roomUserCnt="+notify.UserCount);
+            Debug.Log("[ProcessRoomUserListNotify] UserIDList[0]="+notify.UserIDList[0]);
+            
+            GameNetworkServer.Instance.RivalID = notify.UserIDList[0];
+            GameSceneManager.isGameCanStart = true;
+        }
+
+
+        static void ProcessRoomNewUserNotify(PacketData packet)
+        {
+            var notify = new RoomNewUserNotifyPacket();
+            notify.FromBytes(packet.BodyData);
+
+            GameNetworkServer.Instance.RivalID = notify.UserID;
+            GameSceneManager.isGameCanStart = true;
+        }
+        
 
         static void ProcessChatRoomNotify(PacketData packet)
         {

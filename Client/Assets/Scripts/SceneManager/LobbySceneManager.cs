@@ -7,84 +7,84 @@ using GameNetwork;
 
 public class LobbySceneManager : MonoBehaviour
 {
-    public static bool isMatchingResArrived { get; set; } = false;
-    public static bool isMatchingNtfArrived { get; set; } = false;
     public static bool isWatingEnterRoomRes { get; set; } = false;
-    //private static PKTNtfLobbyMatch matchInfo;
     public static RoomEnterResPacket roomEnterRes { get; set; }
-    
+
     private GameNetworkServer gameServer;
+    private ErrorMsgBox errorMsgBox;
 
     // Start is called before the first frame update
     void Start()
     {
         
         gameServer = GameNetworkServer.Instance;
+        errorMsgBox = gameObject.AddComponent<ErrorMsgBox>();
+
         roomEnterRes = new RoomEnterResPacket();
-        // matchInfo = new PKTNtfLobbyMatch();
+        if (errorMsgBox != null)
+        {
+            errorMsgBox.Init();
+        }
+        else
+        {
+            Debug.LogWarning("errorMsgBox is null");
+        }
         
+        Debug.Log("start Lobby Scene");
     }
 
 
     // Update is called once per frame
     void Update()
     {
-    
-       
-    
 
-        if (isMatchingNtfArrived == true)
+        if(GameNetworkServer.Instance.ClientStatus == GameNetworkServer.CLIENT_STATUS.LOGIN && isWatingEnterRoomRes==true)
         {
-            ProcessMatchingNotify();
-            isMatchingNtfArrived = false;
+            if (roomEnterRes.Result == ERROR_CODE.DUMMY_CODE)
+            {
+                return;
+            }
+
+            if (roomEnterRes.Result == ERROR_CODE.NONE)
+            {
+                GameNetworkServer.Instance.ClientStatus = GameNetworkServer.CLIENT_STATUS.ROOM;
+                SceneManager.LoadScene("Game");
+            }
+            else
+            {
+                errorMsgBox.PopUpErrorMessage("[방 입장요청 오류]"+roomEnterRes.Result);
+            }
         }
 
-        if(GameNetworkServer.Instance.ClientStatus == GameNetworkServer.CLIENT_STATUS.LOGIN && isWatingEnterRoomRes==false)
-        {
-        //    GameNetworkServer.Instance.RequestRoomEnter(matchInfo.RoomNumber);
-            isWatingEnterRoomRes = true;
-        }
-        else if(GameNetworkServer.Instance.ClientStatus == GameNetworkServer.CLIENT_STATUS.ROOM)
-        {
-            SceneManager.LoadScene("Game");
-        }
-        
     }
 
-
-  
 
     public void SendRoomEnterReqPacket()
     {
-     //gameServer.Send  
-    }
-
-
-
-    void ProcessMatchingNotify()
-    {
-      
-        if(GameNetworkServer.Instance.GetIsConnected() == true)
+        Debug.Log("RoomEnterReqPacket called");
+        if (isWatingEnterRoomRes == true)
         {
-            //RoomEnter
-
+            return;
         }
+
+        var request = new RoomEnterReqPacket();
+        var bodyData = request.ToBytes();
+
+        if (gameServer.ClientStatus == GameNetworkServer.CLIENT_STATUS.LOGIN)
+        {
+
+            if (gameServer.GetIsConnected() == false)
+            {
+               errorMsgBox.PopUpErrorMessage("네트워크와의 접속이 끊어졌습니다");
+            }
+
+            GameNetworkServer.Instance.RequestRoomEnter();
+        }
+
+        isWatingEnterRoomRes = true;
+        Debug.Log("RoomEnterReqPacket sended");
+       
     }
 
-
-    public static bool FillMatchInfo(string ip_addr, ushort port, int room_idx)
-    {
-       // matchInfo.GameServerIP = ip_addr;
-       // matchInfo.GameServerPort = port;
-      //  matchInfo.RoomNumber = room_idx;
-
-        Debug.Log("[FillMatchInfo] ip:"+ip_addr+"  port:"+port+"  roomNum:"+room_idx);
-        return true;
-    }
-
-    public static int GetMatchedRooom()
-    {
-       // return matchInfo.RoomNumber;
-       return 0;
-    }
+    
 }

@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Threading;
 using UnityEngine;
 using UnityEngine.UI;
 using GameNetwork;
@@ -8,7 +9,11 @@ public class GameSceneManager : MonoBehaviour
 {
     private InputField chatMsgInputField;
     private Text chattingLog;
-    GameObject ErrorMsgPopUp;
+
+    public static bool isGameCanStart { get; set; } = false;
+
+    private GameNetworkServer gameServer;
+    private ErrorMsgBox errorMsgBox;
 
 
     bool isGameStart = false;
@@ -19,9 +24,19 @@ public class GameSceneManager : MonoBehaviour
         chattingLog = GameObject.Find("ChattingLog").GetComponent<Text>();
         chattingLog.text = "";
 
-        ErrorMsgPopUp = GameObject.Find("ErrorMsgPanel");
-
-        ErrorMsgPopUp.SetActive(false);
+        errorMsgBox = gameObject.AddComponent<ErrorMsgBox>();
+        if (errorMsgBox != null)
+        {
+            errorMsgBox.Init();
+        }
+        else
+        {
+            Debug.LogWarning("errorMsgBox is null");
+        }
+        
+        
+        Debug.Log("start Game Scene");
+        
     }
 
 
@@ -32,7 +47,7 @@ public class GameSceneManager : MonoBehaviour
         if (GameNetworkServer.Instance.ChatMsgQueue.Count > 0)
         {
             RoomChatNotPacket recvMsg = GameNetworkServer.Instance.ChatMsgQueue.Dequeue();
-            chattingLog.text += "[" + recvMsg.UserID + "] " + recvMsg.Message + "\n";
+            chattingLog.text += "[" + recvMsg.UserUniqueId + "] " + recvMsg.Message + "\n";
         }
 
         if(isGameStart == false && GameNetworkServer.Instance.ClientStatus == GameNetworkServer.CLIENT_STATUS.GAME )
@@ -40,6 +55,9 @@ public class GameSceneManager : MonoBehaviour
             GameObject.Find("GameStartButton").GetComponent<Button>().interactable = false;
             isGameStart = true;
         }
+        
+        
+        
 
     }
 
@@ -71,19 +89,12 @@ public class GameSceneManager : MonoBehaviour
         }
         else
         {
-            PopUpErrorMessage("게임시작 요청을 보낼 수 있는 상태가 아닙니다.");
+            errorMsgBox.PopUpErrorMessage("게임시작 요청을 보낼 수 있는 상태가 아닙니다.");
         }
         
     }
 
 
-    public void PopUpErrorMessage(string message)
-    {
-        ErrorMsgPopUp.SetActive(true);
-        Text ErrorMessage = GameObject.Find("ErrorMsgText").GetComponent<Text>();
-        ErrorMessage.text = message;
-
-    }
 
 
 }

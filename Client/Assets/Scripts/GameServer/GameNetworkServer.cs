@@ -118,14 +118,13 @@ namespace GameNetwork
         }
 
 
-        public void RequestRoomEnter(int RoomID)
+        public void RequestRoomEnter()
         {
             if (ClientStatus == CLIENT_STATUS.LOGIN)
             {
                 var request = new RoomEnterReqPacket();
-                request.RoomNumber = RoomID;
                 var bodyData = request.ToBytes();
-                PostSendPacket(PACKET_ID.EnterRoomReq, bodyData);
+                PostSendPacket(PACKET_ID.ROOM_ENTER_REQ, bodyData);
             }
             else
             {
@@ -134,12 +133,12 @@ namespace GameNetwork
         }
 
 
-        public void RequestChatMsg(string Msg)
+        public void RequestChatMsg(string msg)
         {
             var request = new RoomChatReqPacket();
-            request.Message = Msg;
+            request.SetValue(msg);
             var bodyData = request.ToBytes();
-            PostSendPacket(PACKET_ID.ChatRoomReq, bodyData);
+            PostSendPacket(PACKET_ID.ROOM_CHAT_REQ, bodyData);
         }
 
 
@@ -289,6 +288,7 @@ namespace GameNetwork
                 PacketData packet = new PacketData();
                 lock (((System.Collections.ICollection)RecvPacketQueue).SyncRoot)
                 {
+
                     if (RecvPacketQueue.Count() > 0)
                     {
                         packet = RecvPacketQueue.Dequeue();

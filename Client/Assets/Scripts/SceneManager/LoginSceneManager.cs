@@ -12,8 +12,8 @@ public class LoginSceneManager : MonoBehaviour
 
     private bool isLoginReqPktSended = false;
     private GameNetworkServer gameServer;
+    private ErrorMsgBox errorMsgBox;
     public static Int16 loginResult { get; set; } = (Int16)ERROR_CODE.DUMMY_CODE;
-    GameObject ErrorMsgPopUp;
 
 
     // Start is called before the first frame update
@@ -21,24 +21,23 @@ public class LoginSceneManager : MonoBehaviour
     {
         Screen.SetResolution(1920,1080,false);
         gameServer = GameNetworkServer.Instance;
-        
-        ErrorMsgPopUp = GameObject.Find("ErrorMsgPanel");
-        
-        
-        if (ErrorMsgPopUp == null)
-        {
-            Debug.LogError("Panel Not Found!");
-        }
+        errorMsgBox = gameObject.AddComponent<ErrorMsgBox>();
 
-        
-        ErrorMsgPopUp.SetActive(false);
+        if (errorMsgBox != null)
+        {
+            Debug.Log("errorMsgBox Init");
+            errorMsgBox.Init();
+        }
+        else
+        {
+            Debug.LogWarning("errorMsgBox is null");
+        }
 
     }
 
     // Update is called once per frame
     void Update()
     {
-      
         if (isLoginReqPktSended == true )
         {
             
@@ -49,11 +48,11 @@ public class LoginSceneManager : MonoBehaviour
             }
             else if(loginResult != (Int16) ERROR_CODE.DUMMY_CODE )
             {
-                PopUpErrorMessage("[로그인 오류] 오류코드:"+ loginResult);
+                
+                errorMsgBox.PopUpErrorMessage("[로그인 오류] 오류코드:"+ loginResult);
                 isLoginReqPktSended = false;
                 
             }
-
         }
 
     }
@@ -79,24 +78,13 @@ public class LoginSceneManager : MonoBehaviour
                 GameNetworkServer.Instance.ConnectToServer();
             }
 
-            GameNetworkServer.Instance.RequestLogin(InputID, InputPW); //PW를 dummy데이터로 설정하였음
-
-            gameServer.PostSendPacket(PACKET_ID.LOGIN_REQ, bodyData);
+            GameNetworkServer.Instance.RequestLogin(InputID, InputPW);
         }
 
         isLoginReqPktSended = true;
         Debug.Log("LoginReqPacket sended");
         
-        
-
     }
     
-    public void PopUpErrorMessage(string message)
-    {
-        ErrorMsgPopUp.SetActive(true);
-        Text ErrorMessage = GameObject.Find("ErrorMsgText").GetComponent<Text>();
-        ErrorMessage.text = message;
-
-    }
     
 }
