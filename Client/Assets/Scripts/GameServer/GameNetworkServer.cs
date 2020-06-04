@@ -5,11 +5,14 @@ using System.Threading;
 
 using UnityEngine;
 using ServerCommon;
+using Unity.Collections.LowLevel.Unsafe;
 
 namespace GameNetwork
 {
     public class GameNetworkServer : MonoBehaviour
     {
+        
+        //게임서버 로직에 필요한 변수들을 정의한 부분
         private static GameNetworkServer instance ;
       
         private string ipAddr = "127.0.0.1";
@@ -32,11 +35,18 @@ namespace GameNetwork
         System.Threading.Thread NetworkSendThread = null;
         System.Threading.Thread ProcessReceivedPacketThread = null;
 
-
         public CLIENT_STATUS ClientStatus { get; set; } = new CLIENT_STATUS();
-        public string UserID { get; set; } = "";
-        public string RivalID { get; set; } = "";
+        public UInt64 Local_RoomUserUniqueID ;
+        public String LocalUserID;
 
+        public struct UserData
+        {
+            public string ID;
+            public Int16 Status;
+        }
+
+        public Dictionary<UInt64, UserData> RoomUserInfo;
+        
         public Single SyncPacketInterval { get; set; } = 0.1f;
 
 
@@ -49,6 +59,8 @@ namespace GameNetwork
         }
 
 
+        
+        //게임서버 싱글톤 패턴을 위한 함수들 정의한 부분
         public static GameNetworkServer Instance {
             get {
                 return instance;
@@ -66,9 +78,12 @@ namespace GameNetwork
             DontDestroyOnLoad(gameObject);
         }
 
+        
 
+        // 게임서버 멀티스레딩 관련 부분
         void Init() {
             ClientStatus = CLIENT_STATUS.NONE;
+            
 
             PacketBuffer.Init((8096 * 10), PacketHeaderSize, 1024);
 
@@ -94,6 +109,57 @@ namespace GameNetwork
             NetworkSendThread.Start();
             ProcessReceivedPacketThread.Start();
         }
+        
+        
+        
+        
+        
+          
+        // 게임룸 관련 설정하기
+        public void InitRoomUserInfo()
+        {
+            RoomUserInfo = new Dictionary<UInt64, UserData>(2);
+        }
+
+
+
+        public void AddUserInfo(UInt64 UniqueSessionID, String UserID, Int16 UserStatus)
+        {
+            UserData userData = new UserData();
+            userData.ID = UserID;
+            userData.Status = UserStatus;
+
+            RoomUserInfo.Add(UniqueSessionID, userData);
+
+        }
+
+
+        public void DeleteUserInfo(UInt64 UniqueSessionID)
+        {
+            bool result = RoomUserInfo.Remove(UniqueSessionID);
+            if (result != true)
+            {
+                Debug.LogError("[GameNetworkServer - DeleteUserInfo] 오류발생");
+            }
+        }
+
+
+        public UserData GetRemoteUserInfo()
+        {
+            foreach (var roomUser in RoomUserInfo)
+            {
+                if (roomUser.Key != Local_RoomUserUniqueID)
+                {
+                    return roomUser.Value;
+                }
+            }
+
+            return new UserData();
+        }
+        
+        
+        
+        
 
         //게임서버 네트워크 부분
         public void ConnectToServer()
@@ -111,7 +177,7 @@ namespace GameNetwork
             var request = new LoginReqPacket();
             request.SetValue(loginID, loginPW);
             var bodyData = request.ToBytes();
-            UserID = loginID;
+            LocalUserID = loginID;
             PostSendPacket(PACKET_ID.LOGIN_REQ, bodyData);
             
             
@@ -143,10 +209,10 @@ namespace GameNetwork
 
 
         // 게임플레이 네트워크 부분
-        public void SendGameStartPacket(GameStartRequestPacket packet)
+        public void SendGameReadyPacket(GameReadyRequestPacket packet)
         {
             var request = packet;
-            PostSendPacket(PACKET_ID.GameStartReqPkt, null);
+            PostSendPacket(PACKET_ID.GAME_READY_REQ, null);
         }
 
         public void SendSynchronizePacket(GameSynchronizePacket packet)

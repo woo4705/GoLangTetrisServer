@@ -18,6 +18,8 @@ TagManager:
   - LocalPlayerName
   - RivalScore
   - RemotePlayerName
+  - LocalReadyLabel
+  - RemoteReadyLabel
   layers:
   - Default
   - TransparentFX

@@ -41,13 +41,13 @@ namespace GameNetwork
                         break;
                     }
 
-                case PACKET_ID.GameStartResPkt:
+                case PACKET_ID.USER_STATUS_NTF:
                     {
-                        ProcessGameStartResponse(packet);
+                        ProcessGameUserStatusNotify(packet);
                         break;
                     }
 
-                case PACKET_ID.GameStartNtfPkt:
+                case PACKET_ID.GAME_START_NTF:
                     {
                         ProcessGameStartNotify(packet);
                         break;
@@ -86,7 +86,7 @@ namespace GameNetwork
             }
             else
             {
-                GameNetworkServer.Instance.UserID = "";
+                GameNetworkServer.Instance.LocalUserID = "";
             }
 
             LoginSceneManager.loginResult = (Int16)response.Result;
@@ -99,6 +99,14 @@ namespace GameNetwork
         {
             var response = LobbySceneManager.roomEnterRes;
             response.FromBytes(packet.BodyData);
+
+            GameNetworkServer.Instance.Local_RoomUserUniqueID = response.RoomUserUniqueID;
+            string userID = GameNetworkServer.Instance.LocalUserID;
+            
+            GameNetworkServer.Instance.InitRoomUserInfo();
+            GameNetworkServer.Instance.AddUserInfo(response.RoomUserUniqueID, userID, 0);
+           
+            
         }
         
         
@@ -111,9 +119,11 @@ namespace GameNetwork
             // 테트리스 대전방에는 2명을 최대로 고정하는것 생각했기에, 하드코딩이 들어가있다.
             Debug.Log("[ProcessRoomUserListNotify] roomUserCnt="+notify.UserCount);
             Debug.Log("[ProcessRoomUserListNotify] UserIDList[0]="+notify.UserIDList[0]);
+            Debug.Log("[ProcessRoomUserListNotify] UserUniqueIdList[0]="+notify.UserUniqueIdList[0]);
             
-            GameNetworkServer.Instance.RivalID = notify.UserIDList[0];
-            GameSceneManager.isGameCanStart = true;
+            GameNetworkServer.Instance.AddUserInfo(notify.UserUniqueIdList[0], notify.UserIDList[0], notify.UserStatusList[0]);
+            GameSceneManager.isRemoteUserInRoom = true;
+            GameSceneManager.isRemoteUserInfoNeedUpdate = true;
         }
 
 
@@ -122,8 +132,9 @@ namespace GameNetwork
             var notify = new RoomNewUserNotifyPacket();
             notify.FromBytes(packet.BodyData);
 
-            GameNetworkServer.Instance.RivalID = notify.UserID;
-            GameSceneManager.isGameCanStart = true;
+            GameNetworkServer.Instance.AddUserInfo(notify.UserUniqueId, notify.UserID, notify.UserStatus);
+            GameSceneManager.isRemoteUserInRoom = true;
+            GameSceneManager.isRemoteUserInfoNeedUpdate = true;
         }
         
 
@@ -135,13 +146,42 @@ namespace GameNetwork
         }
 
 
-        static void ProcessGameStartResponse(PacketData packet)
+        static void ProcessGameUserStatusNotify(PacketData packet)
         {
-            var response = new GameStartResponsePacket();
-            response.FromBytes(packet.BodyData);
-            //TODO Result에 따른 처리 구현하기
+            var notify = new GameUserStatusNotifyPacket();
+            notify.FromBytes(packet.BodyData);
+
+            if (notify.RoomUserUniqueID == GameNetworkServer.Instance.Local_RoomUserUniqueID)
+            {
+                if (notify.UserStatus == 2)
+                {
+                    Debug.Log("UserStatusReady");
+                    GameSceneManager.isLocalReadyON_MsgArrived = true;
+                }
+                else
+                {
+                    Debug.Log("UserStatus:"+notify.UserStatus);
+                    GameSceneManager.isLocalReadyOFF_MsgArrived = true;
+                }
+            }
+            else
+            {
+                if (notify.UserStatus == 2)
+                {
+                    Debug.Log("UserStatusReady");
+                    GameSceneManager.isRemoteReadyON_MsgArrived = true;
+                }
+                else
+                {
+                    Debug.Log("UserStatus:"+notify.UserStatus);
+                    GameSceneManager.isRemoteReadyOFF_MsgArrived = true;
+                }
+            }
         }
 
+        
+        
+        
         static void ProcessGameStartNotify(PacketData packet)
         {
            var response = new GameStartNotifyPacket();

@@ -31,7 +31,6 @@ public class GameManager : MonoBehaviour {
     public bool InputAllowed = true;
     public Single FallSpeed = 1f;
     public Int32 GameLevel = 0;
-    public string SetPlayerName = "Player";
     public InputField myInputField;
     public bool isGameOver = false;
 
@@ -54,57 +53,9 @@ public class GameManager : MonoBehaviour {
     void Start () {
         GameObject sm = GameObject.FindGameObjectWithTag("SettingsMenu");
         if(sm!=null) DontDestroyOnLoad(sm);
-        LoadSettings();
     }
 	
-	// Update is called once per frame
-	void Update () {
-        
-	}
 
-
-    public void NewGame()
-    {    
-        GameManager.Instance.LineValue = 0;
-        GameManager.Instance.ScoreValue = 0;
-        GameManager.Instance.ScoreValue = 0;
-        GameObject gsui = GameObject.FindGameObjectWithTag("gsui");
-        GameObject PlayerLabel = GameObject.FindGameObjectWithTag("PlayerLabel");
-        GameObject pl = GameObject.FindGameObjectWithTag("PauseLabel");
-        pl.GetComponent<Text>().enabled = false;
-        
-        PlayerLabel.GetComponent<Text>().text = GameManager.Instance.SetPlayerName;
-        LoadSettings();
-    }
-
-
-    public void LoadPlayer()
-    {
-        string PlayerName = GameNetworkServer.Instance.UserID;
-        GameObject[] LocalNameLabels = GameObject.FindGameObjectsWithTag("LocalPlayerName");
-
-        foreach (GameObject TextLabelObject in  LocalNameLabels)
-        {
-            Text PlayerText = TextLabelObject.GetComponent<Text>();
-            PlayerText.text = PlayerName;
-        }
-        
-        Debug.Log("Player Name set to: " + PlayerName);
-
-        string RivalName = GameNetworkServer.Instance.RivalID;
-        GameObject[] RemoteNameLabels = GameObject.FindGameObjectsWithTag("RemotePlayerName");
-        foreach (GameObject TextLabelObject in RemoteNameLabels)
-        {
-            Text PlayerText = TextLabelObject.GetComponent<Text>();
-            PlayerText.text = RivalName;
-        }
-
-    }
-   
-    public void LoadSettings()
-    {
-        LoadPlayer();
-    }
     public void ScreenFlash()
     {
         Debug.Log("ScreenFlash() fired!");

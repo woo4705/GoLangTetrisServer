@@ -76,8 +76,9 @@ namespace GameNetwork
     public class RoomUserListNotifyPacket
     {
         public int UserCount = 0;
-        public List<Int64> UserUniqueIdList = new List<Int64>();
+        public List<UInt64> UserUniqueIdList = new List<UInt64>();
         public List<string> UserIDList = new List<string>();
+        public List<Int16> UserStatusList = new List<Int16>();
 
         public bool FromBytes(byte[] bodyData)
         {
@@ -87,7 +88,7 @@ namespace GameNetwork
 
             for (int i = 0; i < userCount; ++i)
             {
-                var uniqeudId = BitConverter.ToInt64(bodyData, readPos);
+                var uniqeudId = BitConverter.ToUInt64(bodyData, readPos);
                 readPos += 8;
 
                 var idlen = (SByte)bodyData[readPos];
@@ -95,9 +96,14 @@ namespace GameNetwork
 
                 var id = Encoding.UTF8.GetString(bodyData, readPos, idlen);
                 readPos += idlen;
+                
+                var status = BitConverter.ToInt16(bodyData, readPos);
+                readPos += 2;
 
                 UserUniqueIdList.Add(uniqeudId);
                 UserIDList.Add(id);
+                UserStatusList.Add(status);
+                
             }
 
             UserCount = userCount;
@@ -109,16 +115,25 @@ namespace GameNetwork
 
     public class RoomNewUserNotifyPacket
     {
-        public Int64 UserUniqueId;
+        public UInt64 UserUniqueId;
         public string UserID;
+        public Int16 UserStatus;
 
         public bool FromBytes(byte[] bodyData)
         {
-            UserUniqueId = BitConverter.ToInt64(bodyData, 0);
-            
-            var idlen = (SByte)bodyData[8];
- 
-            UserID = Encoding.UTF8.GetString(bodyData, 9, idlen);
+            var readPos = 0;
+
+            UserUniqueId = BitConverter.ToUInt64(bodyData, readPos);
+            readPos += 8;
+
+            var idlen = (SByte)bodyData[readPos];
+            ++readPos;
+
+            UserID = Encoding.UTF8.GetString(bodyData, readPos, idlen);
+            readPos += idlen;
+
+            UserStatus = BitConverter.ToInt16(bodyData, readPos);
+            readPos += 2;
 
             return true;
         }

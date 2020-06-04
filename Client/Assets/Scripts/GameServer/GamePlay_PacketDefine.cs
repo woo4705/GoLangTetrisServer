@@ -30,9 +30,11 @@ namespace GameNetwork
 
         RivalUserInfoNtf = 220,
 
-        GameStartReqPkt = 301,
-        GameStartResPkt = 302,
-        GameStartNtfPkt = 303,
+        GAME_READY_REQ = 751,
+        USER_STATUS_NTF = 752,
+
+        GAME_START_REQ = 761,
+        GAME_START_NTF = 762,
 
         GameSyncReqPkt = 304,
         GameSyncNtfPkt = 305,
@@ -106,7 +108,7 @@ namespace GameNetwork
         public byte[] BodyData;
     }
 
-    public class GameStartRequestPacket {
+    public class GameReadyRequestPacket {
     }
 
     public class GameStartResponsePacket  {
@@ -118,8 +120,22 @@ namespace GameNetwork
         }
     }
 
-    public class GameStartNotifyPacket {
+    
+    public class GameUserStatusNotifyPacket {
+        public UInt64 RoomUserUniqueID;
+        public Int16 UserStatus;
 
+
+        public bool FromBytes(byte[] bodyData)
+        {
+            RoomUserUniqueID = BitConverter.ToUInt64(bodyData, 0);
+            UserStatus = BitConverter.ToInt16(bodyData, 4);
+            return true;
+        }
+    }
+    
+    public class GameStartNotifyPacket {
+        
     }
 
 

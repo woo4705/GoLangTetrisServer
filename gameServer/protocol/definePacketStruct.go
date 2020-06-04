@@ -132,9 +132,10 @@ func (packet *RoomEnterResponsePacket) DecodingPacket(bodyData []byte) bool {
 
 //RoomUserListData Packet
 type RoomUserData struct {
-	UniqueID int64
+	UniqueID uint64
 	IDLen	 int8
 	ID		 []byte
+	Status	 int16
 }
 
 type RoomUserListNotifyPacket struct{
@@ -301,6 +302,51 @@ func (packet *RoomChatNotifyPacket) Decoding(bodyData []byte) bool{
 	packet.Msg = reader.ReadBytes(int(packet.MsgLen))
 
 	return true
+}
+
+
+
+
+type GameReadyRequestPacket struct {
+}
+
+
+type GameUserStatusNotifyPacket struct {
+	RoomUserUniqueID	uint64
+	UserStatus			int16
+}
+
+func (packet GameUserStatusNotifyPacket) EncodingPacket() ([]byte, int16){
+	totalPacketSize := public_clientSessionHeaderSize + 8 + 2
+	sendBuf := make([]byte,totalPacketSize)
+
+	writer := NetLib.MakeWriter(sendBuf,true)
+	EncodingPacketHeader(&writer,totalPacketSize, PACKET_ID_USER_STATUS_NTF,0)
+	writer.WriteU64(packet.RoomUserUniqueID)
+	writer.WriteS16(packet.UserStatus)
+
+	return sendBuf, totalPacketSize
+}
+
+func (packet *GameUserStatusNotifyPacket) Decoding(bodyData []byte) bool{
+	reader := NetLib.MakeReader(bodyData, true)
+	packet.RoomUserUniqueID,_ = reader.ReadU64()
+	return true
+}
+
+
+type GameStartNotifyPacket struct {
+
+}
+
+func (packet GameStartNotifyPacket) EncodingPacket() ([]byte, int16){
+	totalPacketSize := public_clientSessionHeaderSize
+	sendBuf := make([]byte,totalPacketSize)
+
+	writer := NetLib.MakeWriter(sendBuf,true)
+	EncodingPacketHeader(&writer,totalPacketSize, PACKET_ID_GAME_START_NTF,0)
+
+	return sendBuf, totalPacketSize
 }
 
 

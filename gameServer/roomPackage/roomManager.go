@@ -76,8 +76,7 @@ func (roomMgr *RoomManager) PacketProcess(roomNumber int32, packet protocol.Pack
 		var requestPacket protocol.RoomEnterRequestPacket
 		(&requestPacket).DecodingPacket(packet.Data)
 
-		
-		//TODO: 클라이언트가 들어가고 싶은 Room번호로 요청했던 구조에서, 서버가 자동으로 배정하는 구조로 바뀌었으므로 기존의 패킷 구조와 맞지않아 수정하였는데, 이 부분에서 부작용이 없는지 테스트가 필요
+
 	}
 
 

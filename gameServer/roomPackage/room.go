@@ -23,6 +23,8 @@ type BaseRoom struct {
 
 	EnterUserNotify			func(int64, int32)
 	LeaveUserNotify			func(int64)
+
+	ReadyUserCount			int
 }
 
 
@@ -54,6 +56,8 @@ func (room *BaseRoom) Initialize(index int32, config RoomConfig){
 
 	room.InitUserPool()
 	room.UserSessionUniqueIDMap = make(map[uint64]*RoomUser)
+
+	room.ReadyUserCount = 0
 }
 
 
@@ -75,6 +79,7 @@ func (room *BaseRoom) SettingPacketFunction() {
 	room.AddPacketFunction(protocol.PACKET_ID_ROOM_LEAVE_REQ, room.PacketProcess_LeaveUser)
 	room.AddPacketFunction(protocol.PACKET_ID_ROOM_CHAT_REQ, room.PacketProcess_Chat)
 	room.AddPacketFunction(protocol.PACKET_ID_ROOM_RELAY_REQ, room.PacketProcess_Relay)
+	room.AddPacketFunction(protocol.PACKET_ID_GAME_READY_REQ, room.PacketProcess_GameReadyRequest)
 
 
 }

@@ -19,8 +19,12 @@ public class LobbySceneManager : MonoBehaviour
         
         gameServer = GameNetworkServer.Instance;
         errorMsgBox = gameObject.AddComponent<ErrorMsgBox>();
-
+        Text userIDText = GameObject.Find("id_txt").GetComponent<Text>();
+        
         roomEnterRes = new RoomEnterResPacket();
+        userIDText.text = GameNetworkServer.Instance.LocalUserID;
+        
+        
         if (errorMsgBox != null)
         {
             errorMsgBox.Init();

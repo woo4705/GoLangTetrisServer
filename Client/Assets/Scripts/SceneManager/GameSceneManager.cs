@@ -10,7 +10,16 @@ public class GameSceneManager : MonoBehaviour
     private InputField chatMsgInputField;
     private Text chattingLog;
 
-    public static bool isGameCanStart { get; set; } = false;
+    public static bool isRemoteUserInRoom { get; set; } = false;
+    public static bool isLocalUserInfoNeedUpdate { get; set; } = false;
+    public static bool isRemoteUserInfoNeedUpdate { get;set;} =  false;
+    
+    public static bool isLocalReadyON_MsgArrived { get;set;} =  false;
+    public static bool isRemoteReadyON_MsgArrived { get;set;} =  false;
+    
+    public static bool isLocalReadyOFF_MsgArrived { get;set;} =  false;
+    public static bool isRemoteReadyOFF_MsgArrived { get;set;} =  false;
+    
 
     private GameNetworkServer gameServer;
     private ErrorMsgBox errorMsgBox;
@@ -36,7 +45,11 @@ public class GameSceneManager : MonoBehaviour
         
         
         Debug.Log("start Game Scene");
-        
+        isLocalUserInfoNeedUpdate = true;
+
+        UI_IsReadyLocalPlayer(false);
+        UI_IsReadyRemotePlayer(false);
+
     }
 
 
@@ -50,18 +63,117 @@ public class GameSceneManager : MonoBehaviour
             chattingLog.text += "[" + recvMsg.UserUniqueId + "] " + recvMsg.Message + "\n";
         }
 
-        if(isGameStart == false && GameNetworkServer.Instance.ClientStatus == GameNetworkServer.CLIENT_STATUS.GAME )
+        if (isLocalUserInfoNeedUpdate )
         {
-            GameObject.Find("GameStartButton").GetComponent<Button>().interactable = false;
-            isGameStart = true;
+            GameNetworkServer.UserData userData=
+                GameNetworkServer.Instance.RoomUserInfo[GameNetworkServer.Instance.Local_RoomUserUniqueID];
+            UI_SetLocalPlayerInfo(userData.ID);
+            isLocalUserInfoNeedUpdate = false;
         }
         
+        if (isRemoteUserInfoNeedUpdate )
+        {
+            GameNetworkServer.UserData userData =
+                GameNetworkServer.Instance.GetRemoteUserInfo();
+            UI_SetRemotePlayerInfo(userData.ID);
+            isRemoteUserInfoNeedUpdate = false;
+        }
+
+
+        if (isLocalReadyON_MsgArrived)
+        {
+            UI_IsReadyLocalPlayer(true);
+            isLocalReadyON_MsgArrived = false;
+        }
+        if (isLocalReadyOFF_MsgArrived)
+        {
+            UI_IsReadyLocalPlayer(false);
+            isLocalReadyOFF_MsgArrived = false;
+        }
         
+        if (isRemoteReadyON_MsgArrived)
+        {
+            UI_IsReadyRemotePlayer(true);
+            isRemoteReadyON_MsgArrived = false;
+        }
+        if (isRemoteReadyOFF_MsgArrived)
+        {
+            UI_IsReadyRemotePlayer(false);
+            isRemoteReadyOFF_MsgArrived = false;
+        }
         
+
+        if(isGameStart == false && GameNetworkServer.Instance.ClientStatus == GameNetworkServer.CLIENT_STATUS.GAME )
+        {
+            GameObject.Find("GameReadyButton").GetComponent<Button>().interactable = false;
+            isGameStart = true;
+        }
 
     }
+    
+    
+    
+
+    
+    
+    public void UI_SetLocalPlayerInfo(string UserID)
+    {
+ 
+        GameObject[] LocalNameLabels = GameObject.FindGameObjectsWithTag("LocalPlayerName");
+
+        foreach (GameObject TextLabelObject in  LocalNameLabels)
+        {
+            Text PlayerText = TextLabelObject.GetComponent<Text>();
+            PlayerText.text = UserID;
+        }
+        
+        Debug.Log("Player Name set to: " + UserID);
+    }
+
+    public void UI_SetRemotePlayerInfo(string UserID)
+    {
+       
+       GameObject[] RemoteNameLabels = GameObject.FindGameObjectsWithTag("RemotePlayerName");
+        foreach (GameObject TextLabelObject in RemoteNameLabels)
+        {
+            Text PlayerText = TextLabelObject.GetComponent<Text>();
+            PlayerText.text = UserID;
+        }
+    }
+
+    
 
 
+     void UI_IsReadyLocalPlayer(bool is_on)
+     {
+         if (is_on)
+         {
+             (GameObject.FindGameObjectWithTag("LocalReadyLabel")).GetComponent<Text>().text = "READY";
+         }
+         else
+         {
+             (GameObject.FindGameObjectWithTag("LocalReadyLabel")).GetComponent<Text>().text = "";
+         }
+         
+     }
+     void UI_IsReadyRemotePlayer(bool is_on)
+     {
+         if (is_on)
+         {
+             (GameObject.FindGameObjectWithTag("RemoteReadyLabel")).GetComponent<Text>().text = "READY";
+         }
+         else
+         {
+             (GameObject.FindGameObjectWithTag("RemoteReadyLabel")).GetComponent<Text>().text = "";
+         }
+     }
+    
+     
+    
+
+     
+     
+     
     public void OnClickMsgSendButton()
     {
         string message="";
@@ -80,17 +192,25 @@ public class GameSceneManager : MonoBehaviour
     }
 
 
-    public void OnClickGameStartBtn()
+    public void SendReadyRequest()
     {
 
-        if(GameNetworkServer.Instance.ClientStatus == GameNetworkServer.CLIENT_STATUS.ROOM)
+        var request = new GameReadyRequestPacket();
+
+        if (GameNetworkServer.Instance.ClientStatus == GameNetworkServer.CLIENT_STATUS.ROOM)
         {
-            GameNetworkServer.Instance.SendGameStartPacket(new GameStartRequestPacket());
+
+            if (GameNetworkServer.Instance.GetIsConnected() == false)
+            {
+                GameNetworkServer.Instance.ConnectToServer();
+            }
+
+            GameNetworkServer.Instance.SendGameReadyPacket(request);
         }
-        else
-        {
-            errorMsgBox.PopUpErrorMessage("게임시작 요청을 보낼 수 있는 상태가 아닙니다.");
-        }
+
+      
+     //   Debug.Log("LoginReqPacket sended");
+
         
     }
 

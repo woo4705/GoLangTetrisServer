@@ -98,6 +98,7 @@ func (room *BaseRoom) SendUserInfoListPacket(user *RoomUser){
 	var response protocol.RoomUserListNotifyPacket
 	response.UserCount = userCount
 	response.UserList = userInfoListBuffer
+
 	sendBuf, _ := response.EncodingPacket(userInfoListSize)
 
 	NetLib.NetLibIPostSendToClient(user.NetSessionIndex, user.NetSessionUniqueID, sendBuf)
@@ -135,7 +136,6 @@ func (room *BaseRoom) PacketProcess_LeaveUser(user *RoomUser, packet protocol.Pa
 
 
 func (room *BaseRoom) LeaveUserProcess(user *RoomUser)  {
-	NetLib.NTELIB_LOG_DEBUG("[Room LeaveUser Processs]")
 
 	roomUserUniqueID := user.RoomUniqueID
 	userSessionIndex := user.NetSessionIndex
