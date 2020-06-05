@@ -404,6 +404,23 @@ func (packet *RoomRelayNotifyPacket) Decoding(bodyData []byte) bool {
 
 
 
+type GameSyncRequstPacket struct {
+	EventRecordArr [6]int16
+	Score int32
+	Line  int32
+	Level  int32
+}
+
+
+
+type GameSyncNotifyPacket struct {
+	EventRecordArr [6]int16
+	Score int32
+	Line  int32
+	Level  int32
+}
+
+
 
 //Error Notify패킷 정의
 type ErrorNotifyPacket struct {

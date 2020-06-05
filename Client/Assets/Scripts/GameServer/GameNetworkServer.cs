@@ -219,7 +219,7 @@ namespace GameNetwork
         {
             var request = packet;
             var bodyData = request.ToBytes();
-            PostSendPacket(PACKET_ID.GameSyncReqPkt, bodyData);
+            PostSendPacket(PACKET_ID.GAME_SYNC_REQ, bodyData);
          }
 
         public void SendGameEndPacket(GameEndRequestPacket packet)

@@ -210,3 +210,9 @@ func SendRoomChatResult(sessionIndex int32, sessionUniqueID uint64, result int16
 	sendPacket,_ := response.EncodingPacket()
 	NetLib.NetLibIPostSendToClient(sessionIndex, sessionUniqueID, sendPacket)
 }
+
+
+
+func (room *BaseRoom) PacketProcess_Game_Sync_Req(user *RoomUser, packet protocol.Packet){
+
+}

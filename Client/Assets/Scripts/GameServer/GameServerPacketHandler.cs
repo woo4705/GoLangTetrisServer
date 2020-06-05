@@ -53,7 +53,7 @@ namespace GameNetwork
                         break;
                     }
 
-                case PACKET_ID.GameSyncNtfPkt:
+                case PACKET_ID.GAME_SYNC_NTF:
                     {
                         ProcessGameSyncNotify(packet);
                         break;

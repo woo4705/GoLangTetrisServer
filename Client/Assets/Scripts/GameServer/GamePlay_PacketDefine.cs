@@ -25,19 +25,16 @@ namespace GameNetwork
 
         
         ROOM_CHAT_REQ = 731,
-        ROOM_CHAT_RES = 732,
         ROOM_CHAT_NTF = 733,
 
-        RivalUserInfoNtf = 220,
 
         GAME_READY_REQ = 751,
         USER_STATUS_NTF = 752,
 
-        GAME_START_REQ = 761,
         GAME_START_NTF = 762,
 
-        GameSyncReqPkt = 304,
-        GameSyncNtfPkt = 305,
+        GAME_SYNC_REQ = 304,
+        GAME_SYNC_NTF = 305,
 
         GameEndReqPkt = 311,
         GameEndResPkt = 312,
@@ -129,7 +126,7 @@ namespace GameNetwork
         public bool FromBytes(byte[] bodyData)
         {
             RoomUserUniqueID = BitConverter.ToUInt64(bodyData, 0);
-            UserStatus = BitConverter.ToInt16(bodyData, 4);
+            UserStatus = BitConverter.ToInt16(bodyData, 8);
             return true;
         }
     }
