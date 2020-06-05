@@ -120,10 +120,14 @@ namespace GameNetwork
             Debug.Log("[ProcessRoomUserListNotify] roomUserCnt="+notify.UserCount);
             Debug.Log("[ProcessRoomUserListNotify] UserIDList[0]="+notify.UserIDList[0]);
             Debug.Log("[ProcessRoomUserListNotify] UserUniqueIdList[0]="+notify.UserUniqueIdList[0]);
+            Debug.Log("[ProcessRoomUserListNotify] UserUniqueIdList[0]="+notify.UserStatusList[0]);
             
+            
+            //GameNetworkServer.Instance
             GameNetworkServer.Instance.AddUserInfo(notify.UserUniqueIdList[0], notify.UserIDList[0], notify.UserStatusList[0]);
-            GameSceneManager.isRemoteUserInRoom = true;
-            GameSceneManager.isRemoteUserInfoNeedUpdate = true;
+            
+            //GameSceneManager.isRemoteUserInRoom = true;
+            //GameSceneManager.isRemoteUserInfoNeedUpdate = true;
         }
 
 
@@ -132,9 +136,14 @@ namespace GameNetwork
             var notify = new RoomNewUserNotifyPacket();
             notify.FromBytes(packet.BodyData);
 
+            Debug.Log("[ProcessRoomUserListNotify] UserStatus="+notify.UserStatus);
+            Debug.Log("[ProcessRoomUserListNotify] UserID="+notify.UserID);
+            Debug.Log("[ProcessRoomUserListNotify] UserUniqueId="+notify.UserUniqueId);
+            
             GameNetworkServer.Instance.AddUserInfo(notify.UserUniqueId, notify.UserID, notify.UserStatus);
             GameSceneManager.isRemoteUserInRoom = true;
             GameSceneManager.isRemoteUserInfoNeedUpdate = true;
+            
         }
         
 

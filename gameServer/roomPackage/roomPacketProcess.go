@@ -8,20 +8,6 @@ import (
 
 )
 
-func (room *BaseRoom) PacketProcess_Relay(user *RoomUser, packet protocol.Packet) int16 {
-	var relayNotify protocol.RoomRelayNotifyPacket
-	relayNotify.RoomUserUniqueID = user.RoomUniqueID
-	relayNotify.Data = packet.Data
-
-	notifySendBuf, packetSize := relayNotify.EncodingPacket(packet.DataSize)
-	room.BroadCastPacket(packetSize, notifySendBuf, 0)
-
-	NetLib.NTELIB_LOG_DEBUG("Room Relay", zap.String("Sender",string(user.ID[:])) )
-	return protocol.ERROR_CODE_NONE
-
-}
-
-
 
 func (room *BaseRoom) PacketProcess_EnterUser(inValidUser *RoomUser, packet protocol.Packet) int16 {
 
@@ -63,13 +49,14 @@ func (room *BaseRoom) PacketProcess_EnterUser(inValidUser *RoomUser, packet prot
 		return protocol.ERROR_CODE_ENTER_ROOM_INVALID_SESSION_STATE
 	}
 
+	//Client측에서 RoomEnterResponse를 받게되면, GameRoom화면을 띄우며 그에 따른 처리를 한다. 따라서 아래의 패킷전송이 먼저 되어야한다.
+	SendRoomEnterResult(sessionIndex, sessionUniqueID, roomNumber, newUser.RoomUniqueID, protocol.ERROR_CODE_NONE)
 
+	// 그 이후 Room에 남아있는 패킷의 정보를 보낸다.
 	if room.GetCurrentUserCount() > 1 {
 		room.SendNewUserInfoPacket(newUser)
 		room.SendUserInfoListPacket(newUser)
 	}
-
-	SendRoomEnterResult(sessionIndex, sessionUniqueID, roomNumber, newUser.RoomUniqueID, protocol.ERROR_CODE_NONE)
 
 	return protocol.ERROR_CODE_NONE
 
@@ -213,6 +200,3 @@ func SendRoomChatResult(sessionIndex int32, sessionUniqueID uint64, result int16
 
 
 
-func (room *BaseRoom) PacketProcess_Game_Sync_Req(user *RoomUser, packet protocol.Packet){
-
-}

@@ -63,6 +63,17 @@ public class GameSceneManager : MonoBehaviour
             chattingLog.text += "[" + recvMsg.UserUniqueId + "] " + recvMsg.Message + "\n";
         }
 
+
+        if (isRemoteUserInRoom == false)
+        {
+            if (GameNetworkServer.Instance.RoomUserInfo.Count > 1)
+            {
+                Debug.Log("Room Full");
+                isRemoteUserInfoNeedUpdate = true;
+                isRemoteUserInRoom = true;
+            }
+        }
+        
         if (isLocalUserInfoNeedUpdate )
         {
             GameNetworkServer.UserData userData=
@@ -105,7 +116,11 @@ public class GameSceneManager : MonoBehaviour
 
         if(isGameStart == false && GameNetworkServer.Instance.ClientStatus == GameNetworkServer.CLIENT_STATUS.GAME )
         {
-            GameObject.Find("GameReadyButton").GetComponent<Button>().interactable = false;
+            GameObject.Find("ReadyButton").GetComponent<Button>().interactable = false;
+            GameObject.Find("LeaveButton").GetComponent<Button>().interactable = false;
+            UI_IsReadyLocalPlayer(false);
+            UI_IsReadyRemotePlayer(false);
+            
             isGameStart = true;
         }
 

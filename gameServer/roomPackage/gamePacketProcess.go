@@ -12,6 +12,7 @@ func (room *BaseRoom) PacketProcess_GameReadyRequest(user *RoomUser, packet prot
 	var notifyPacket protocol.GameUserStatusNotifyPacket
 	notifyPacket.RoomUserUniqueID = user.RoomUniqueID
 	NetLib.NTELIB_LOG_DEBUG("[PacketProcess_GameReadyRequest] ",zap.Int16("user.Status:",user.Status))
+
 	if user.Status==USER_STATUS_NONE {
 		NetLib.NTELIB_LOG_DEBUG("[PacketProcess_GameReadyRequest] user.Status is set to ready");
 		user.Status = USER_STATUS_READY
@@ -34,9 +35,34 @@ func (room *BaseRoom) PacketProcess_GameReadyRequest(user *RoomUser, packet prot
 		var startPacket protocol.GameStartNotifyPacket
 		notifySendBuf, packetSize :=  startPacket.EncodingPacket()
 		room.BroadCastPacket(packetSize, notifySendBuf, 0)
+		
+		//TODO: User의 상태값을 GAME으로 변경하기
 	}
 	
 	NetLib.NTELIB_LOG_DEBUG("Notify GameReady" )
 
+	return protocol.ERROR_CODE_NONE
+}
+
+
+
+func (room *BaseRoom) PacketProcess_Game_Sync_Req(user *RoomUser, packet protocol.Packet) int16{
+	var requestPacket protocol.GameSyncRequestPacket
+	(&requestPacket).DecodingPacket(packet.Data)
+
+
+	var notifyPacket protocol.GameSyncNotifyPacket
+	for i:=0; i<6; i++{
+		notifyPacket.EventRecordArr[i] = requestPacket.EventRecordArr[i]
+	}
+	notifyPacket.Score = requestPacket.Score
+	notifyPacket.Line = requestPacket.Line
+	notifyPacket.Level = requestPacket.Level
+
+
+	sendBuf, packetSize := notifyPacket.EncodingPacket()
+
+	//방에있는 다른 유저 가져오기
+	room.BroadCastPacket(packetSize, sendBuf, user.NetSessionUniqueID)
 	return protocol.ERROR_CODE_NONE
 }

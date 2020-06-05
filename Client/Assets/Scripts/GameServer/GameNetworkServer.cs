@@ -162,14 +162,16 @@ namespace GameNetwork
         
 
         //게임서버 네트워크 부분
-        public void ConnectToServer()
+        public bool ConnectToServer()
         {
             if (Network.Connect(ipAddr, port))
             {
                 Debug.Log("접속성공!");
+                return true;
             }
             else {
                 Debug.Log("접속실패");
+                return false;
             }
         }
 

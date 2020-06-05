@@ -213,7 +213,7 @@ GameObject:
   - component: {fileID: 130022758}
   - component: {fileID: 130022757}
   m_Layer: 5
-  m_Name: input_ip_field
+  m_Name: input_ip_addr_field
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -817,7 +817,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: Enter text...
+  m_Text: 
 --- !u!222 &503027218
 CanvasRenderer:
   m_ObjectHideFlags: 0

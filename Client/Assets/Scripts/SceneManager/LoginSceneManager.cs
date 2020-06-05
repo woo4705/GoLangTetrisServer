@@ -23,6 +23,8 @@ public class LoginSceneManager : MonoBehaviour
         gameServer = GameNetworkServer.Instance;
         errorMsgBox = gameObject.AddComponent<ErrorMsgBox>();
 
+        (GameObject.Find("input_ip_addr_field")).GetComponent<InputField>().text = "127.0.0.1";
+
         if (errorMsgBox != null)
         {
             Debug.Log("errorMsgBox Init");
@@ -64,7 +66,7 @@ public class LoginSceneManager : MonoBehaviour
     {
         var InputID = (GameObject.Find("input_id_field")).GetComponent<InputField>().text;
         var InputPW = (GameObject.Find("input_pw_field")).GetComponent<InputField>().text;
-        var InputIPAddr = (GameObject.Find("input_ip_field")).GetComponent<InputField>().text;
+        var InputIPAddr = (GameObject.Find("input_ip_addr_field")).GetComponent<InputField>().text;
 
         GameNetworkServer.Instance.ipAddr = InputIPAddr;
         var request = new LoginReqPacket();

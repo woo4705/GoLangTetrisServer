@@ -1,8 +1,6 @@
 package protocol
 
 const (
-	PACKET_ID_PING_REQ = 201
-	PACKET_ID_PING_RES = 202
 
 	PACKET_ID_ERROR_NTF = 203
 

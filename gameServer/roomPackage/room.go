@@ -78,9 +78,8 @@ func (room *BaseRoom) SettingPacketFunction() {
 	room.AddPacketFunction(protocol.PACKET_ID_ROOM_ENTER_REQ, room.PacketProcess_EnterUser)
 	room.AddPacketFunction(protocol.PACKET_ID_ROOM_LEAVE_REQ, room.PacketProcess_LeaveUser)
 	room.AddPacketFunction(protocol.PACKET_ID_ROOM_CHAT_REQ, room.PacketProcess_Chat)
-	room.AddPacketFunction(protocol.PACKET_ID_ROOM_RELAY_REQ, room.PacketProcess_Relay)
 	room.AddPacketFunction(protocol.PACKET_ID_GAME_READY_REQ, room.PacketProcess_GameReadyRequest)
-
+	room.AddPacketFunction(protocol.PACKET_ID_GAME_SYNC_REQ, room.PacketProcess_Game_Sync_Req)
 
 }
 
