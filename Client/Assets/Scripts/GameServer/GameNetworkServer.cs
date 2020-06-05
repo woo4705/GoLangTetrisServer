@@ -14,8 +14,8 @@ namespace GameNetwork
         
         //게임서버 로직에 필요한 변수들을 정의한 부분
         private static GameNetworkServer instance ;
-      
-        private string ipAddr = "127.0.0.1";
+
+        public string ipAddr { get; set; } = "127.0.0.1";
         private int port = Convert.ToInt32("11021");
         const int PacketHeaderSize = 5;
 

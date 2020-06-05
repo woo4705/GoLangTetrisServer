@@ -64,8 +64,9 @@ public class LoginSceneManager : MonoBehaviour
     {
         var InputID = (GameObject.Find("input_id_field")).GetComponent<InputField>().text;
         var InputPW = (GameObject.Find("input_pw_field")).GetComponent<InputField>().text;
-        
-        
+        var InputIPAddr = (GameObject.Find("input_ip_field")).GetComponent<InputField>().text;
+
+        GameNetworkServer.Instance.ipAddr = InputIPAddr;
         var request = new LoginReqPacket();
         request.SetValue(InputID, InputPW);
         var bodyData = request.ToBytes();
