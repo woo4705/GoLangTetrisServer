@@ -208,6 +208,23 @@ namespace GameNetwork
             var bodyData = request.ToBytes();
             PostSendPacket(PACKET_ID.ROOM_CHAT_REQ, bodyData);
         }
+        
+        
+        public void RequestRoomLeave()
+        {
+            if (ClientStatus == CLIENT_STATUS.ROOM )
+            {
+                var request = new RoomLeaveReqPacket();
+                var bodyData = request.ToBytes();
+                PostSendPacket(PACKET_ID.ROOM_LEAVE_REQ, bodyData);
+            }
+            else
+            {
+                Debug.LogError("방에 입장한 상태가 아니거나, 게임이 진행중입니다.");
+            }   
+        }
+
+        
 
 
         // 게임플레이 네트워크 부분
@@ -229,8 +246,11 @@ namespace GameNetwork
             var request = packet;
             PostSendPacket(PACKET_ID.GameEndReqPkt, null);
         }
-
-
+        
+        
+        
+        
+        
         //네트워크 Read/Send 스레드 부분
        public void PostSendPacket(PACKET_ID packetID, byte[] bodyData)
         {

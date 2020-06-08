@@ -4,6 +4,7 @@ using System.Threading;
 using UnityEngine;
 using UnityEngine.UI;
 using GameNetwork;
+using UnityEngine.SceneManagement;
 
 public class GameSceneManager : MonoBehaviour
 {
@@ -19,6 +20,7 @@ public class GameSceneManager : MonoBehaviour
     
     public static bool isLocalReadyOFF_MsgArrived { get;set;} =  false;
     public static bool isRemoteReadyOFF_MsgArrived { get;set;} =  false;
+    public static RoomLeaveResPacket roomLeaveResPkt;
     
 
     private GameNetworkServer gameServer;
@@ -32,6 +34,8 @@ public class GameSceneManager : MonoBehaviour
         chatMsgInputField = GameObject.Find("ChatMsgInputField").GetComponent<InputField>();
         chattingLog = GameObject.Find("ChattingLog").GetComponent<Text>();
         chattingLog.text = "";
+        
+        roomLeaveResPkt = new RoomLeaveResPacket();
 
         errorMsgBox = gameObject.AddComponent<ErrorMsgBox>();
         if (errorMsgBox != null)
@@ -63,6 +67,21 @@ public class GameSceneManager : MonoBehaviour
             chattingLog.text += "[" + recvMsg.UserUniqueId + "] " + recvMsg.Message + "\n";
         }
 
+
+        if (roomLeaveResPkt.Result != ERROR_CODE.DUMMY_CODE)
+        {
+            if (roomLeaveResPkt.Result == ERROR_CODE.NONE)
+            {
+                GameNetworkServer.Instance.ClientStatus = GameNetworkServer.CLIENT_STATUS.LOGIN;
+                SceneManager.LoadScene("Lobby");
+            }
+            else
+            {
+                errorMsgBox.PopUpErrorMessage("[방 나가기 요청 오류]"+roomLeaveResPkt.Result);
+            }
+        }
+        
+        
 
         if (isRemoteUserInRoom == false)
         {
@@ -223,12 +242,19 @@ public class GameSceneManager : MonoBehaviour
             GameNetworkServer.Instance.SendGameReadyPacket(request);
         }
 
-      
-     //   Debug.Log("LoginReqPacket sended");
-
-        
     }
 
+
+
+    public void SendLeaveRequest()
+    {
+
+        if (GameNetworkServer.Instance.ClientStatus == GameNetworkServer.CLIENT_STATUS.ROOM)
+        {
+            GameNetworkServer.Instance.RequestRoomLeave();
+
+        }
+    }
 
 
 

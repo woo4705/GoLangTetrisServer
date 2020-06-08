@@ -24,6 +24,10 @@ namespace GameNetwork
         ROOM_NEW_USER_NTF = 724,
 
         
+        ROOM_LEAVE_REQ = 726,
+        ROOM_LEAVE_RES = 727,
+        ROOM_LEAVE_USER_NTFF = 728,
+        
         ROOM_CHAT_REQ = 731,
         ROOM_CHAT_NTF = 733,
 

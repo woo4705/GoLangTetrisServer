@@ -105,9 +105,25 @@ namespace GameNetwork
             
             GameNetworkServer.Instance.InitRoomUserInfo();
             GameNetworkServer.Instance.AddUserInfo(response.RoomUserUniqueID, userID, 0);
-           
             
         }
+
+        
+        
+        static void ProcessLeaveRoomResponse(PacketData packet)
+        {
+            var response = GameSceneManager.roomLeaveResPkt;
+            response.FromBytes(packet.BodyData);
+
+            if (response.Result == ERROR_CODE.NONE)
+            {
+                GameNetworkServer.Instance.InitRoomUserInfo();
+                GameNetworkServer.Instance.Local_RoomUserUniqueID = 0;
+            }
+
+        }
+        
+        
         
         
         
@@ -154,6 +170,29 @@ namespace GameNetwork
             GameNetworkServer.Instance.ChatMsgQueue.Enqueue(response);
         }
 
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
 
         static void ProcessGameUserStatusNotify(PacketData packet)
         {

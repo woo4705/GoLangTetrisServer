@@ -68,8 +68,7 @@ namespace GameNetwork
             return true;
         }
     }
-
-
+    
     
 
 
@@ -146,11 +145,17 @@ namespace GameNetwork
 
     public class RoomLeaveReqPacket
     {
+        public byte[] ToBytes()
+        {
+            List<byte> dataSource = new List<byte>();
+            return dataSource.ToArray();
+        }
+
     }
 
     public class RoomLeaveResPacket
     {
-        public ERROR_CODE Result;
+        public ERROR_CODE Result = ERROR_CODE.DUMMY_CODE;
 
         public bool FromBytes(byte[] bodyData)
         {
