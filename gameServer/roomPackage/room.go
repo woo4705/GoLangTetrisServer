@@ -213,8 +213,7 @@ func  (room *BaseRoom)AllocUserInfo(user *RoomUser) (dataSize int16, dataBuffer 
 
 func WriteUserInfo(writer *NetLib.RawPacketData, user *RoomUser){
 	writer.WriteU64(user.RoomUniqueID)
-	writer.WriteS8(user.IDLen)
-	writer.WriteBytes(user.ID[0:user.IDLen])
+	writer.WriteString(user.ID)
 }
 
 

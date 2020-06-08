@@ -9,32 +9,42 @@ import (
 
 // Login Request패킷 정의
 type LoginRequestPacket struct {
-	UserID []byte
-	UserPW []byte
+	IDLen int16
+	PWLen int16
+	UserID string
+	UserPW string
 }
-
+/*
 func (packet LoginRequestPacket) EncodingPacket() ([]byte, int16){
 	totalPacketSize := public_clientSessionHeaderSize + MAX_USER_ID_BYTE_LENGTH + MAX_USER_PW_BYTE_LENGTH
 	sendBuf := make([]byte,totalPacketSize)
 
 	writer := NetLib.MakeWriter(sendBuf,true)
 	EncodingPacketHeader(&writer,totalPacketSize,PACKET_ID_LOGIN_REQ,0)
-	writer.WriteBytes(packet.UserID[:])
-	writer.WriteBytes(packet.UserPW[:])
+
+	//writer.WriteBytes(packet.UserID[:])
+	//writer.WriteBytes(packet.UserPW[:])
 
 	return sendBuf, totalPacketSize
 }
-
+*/
 
 func (packet *LoginRequestPacket) DecodingPacket(bodyData []byte) bool {
-	bodySize := MAX_USER_ID_BYTE_LENGTH + MAX_USER_PW_BYTE_LENGTH
+
+	reader := NetLib.MakeReader(bodyData, true)
+	packet.IDLen,_ = reader.ReadS16();
+	packet.PWLen,_ = reader.ReadS16();
+
+	bodySize := int(packet.IDLen + packet.PWLen) + 4
+
+	NetLib.NTELIB_LOG_DEBUG("LoginPacket Bodysize = ",zap.Int("bodySize",bodySize ))
+
 	if len(bodyData) != bodySize {
 		return false
 	}
 
-	reader := NetLib.MakeReader(bodyData, true)
-	packet.UserID = reader.ReadBytes(MAX_USER_ID_BYTE_LENGTH)
-	packet.UserPW = reader.ReadBytes(MAX_USER_PW_BYTE_LENGTH)
+	packet.UserID = string( reader.ReadBytes(int(packet.IDLen)) )
+	packet.UserPW = string( reader.ReadBytes(int(packet.PWLen)) )
 
 	return true
 }

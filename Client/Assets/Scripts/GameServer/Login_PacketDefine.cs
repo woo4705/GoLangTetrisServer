@@ -1,31 +1,36 @@
 ﻿using System.Collections.Generic;
+using System.ComponentModel;
 using System.Text;
 
 namespace GameNetwork
-
 {
-   
-    
+
     using System;
-    using UnityEngine;
-    using ServerCommon;
 
     public class LoginReqPacket
     {
-        byte[] UserID = new byte[PacketDataValue.USER_ID_LENGTH];
-        byte[] UserPW = new byte[PacketDataValue.USER_PW_LENGTH];
-
+        Int16 IDLen;
+        Int16 PWLen;
+        string UserID = "";
+        string UserPW = ""; 
+        
         public void SetValue(string userID, string userPW)
         {
-            Encoding.UTF8.GetBytes(userID).CopyTo(UserID, 0);
-            Encoding.UTF8.GetBytes(userPW).CopyTo(UserPW, 0);
+            IDLen = (Int16)userID.Length;
+            PWLen = (Int16)userPW.Length;
+            UserID = userID;
+            UserPW = userPW;
         }
 
         public byte[] ToBytes()
         {
             List<byte> dataSource = new List<byte>();
-            dataSource.AddRange(UserID);
-            dataSource.AddRange(UserPW);
+        
+            dataSource.AddRange(BitConverter.GetBytes(IDLen));
+            dataSource.AddRange(BitConverter.GetBytes(PWLen));
+            dataSource.AddRange(Encoding.UTF8.GetBytes(UserID));
+            dataSource.AddRange(Encoding.UTF8.GetBytes(UserPW));
+            
             return dataSource.ToArray();
         }
     }
@@ -34,7 +39,6 @@ namespace GameNetwork
     {
         public ERROR_CODE Result;
         
-
         public bool FromBytes(byte[] bodyData)
         {
             Result = (ERROR_CODE)BitConverter.ToInt16(bodyData, 0);

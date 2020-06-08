@@ -99,21 +99,12 @@ func (server *GameServer) OnReceive( sessionIndex int32, sessionUniqueID uint64,
 	return true
 }
 
+
+
 func (server *GameServer) OnClose( sessionIndex int32, sessionUniqueID uint64 ) {
 	NetLib.NTELIB_LOG_INFO("client OnClose",
 		zap.Int32("sessionIndex",sessionIndex), zap.Uint64("sessionUniqueID", sessionUniqueID),
 	)
-	server.DisconnectClient(sessionIndex, sessionUniqueID)
-}
-
-
-func (server* GameServer) DisconnectClient( sessionIndex int32, sessionUniqueID uint64 )  {
-	if connectedSession.IsLoginUser(sessionIndex) == false {
-		NetLib.NTELIB_LOG_INFO("DisConnectClient", zap.Int32("sessionIndex",sessionIndex))
-		connectedSession.RemoveSession(sessionIndex, false)
-		return
-	}
-
 	packet := protocol.Packet{
 		sessionIndex,
 		sessionUniqueID,
@@ -124,6 +115,6 @@ func (server* GameServer) DisconnectClient( sessionIndex int32, sessionUniqueID 
 
 	server.PacketChannel <- packet
 
-	NetLib.NTELIB_LOG_INFO("DisConnectClient Login User", zap.Int32("sessionIndex",sessionIndex))
+	NetLib.NTELIB_LOG_INFO("DisConnectClient ", zap.Int32("sessionIndex",sessionIndex))
 }
 

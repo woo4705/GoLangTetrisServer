@@ -1,7 +1,6 @@
 package connectedSession
 
 import (
-	"chatServer/protocol"
 	"sync/atomic"
 )
 
@@ -9,8 +8,7 @@ type Session struct {
 	Index 					int32
 	NetworkUniqueID 		uint64
 
-	UserID 					[protocol.MAX_USER_ID_BYTE_LENGTH]byte
-	UserIDLength 			int8
+	UserID 					string
 
 	ConnectTimeSecond		int64
 	RoomNumber				int32
@@ -25,7 +23,7 @@ func (session *Session) Init(index int32){
 
 
 func (session *Session) ClearUserID(){
-	session.UserIDLength = 0
+	session.UserID = ""
 }
 
 func (session *Session) Clear(){
@@ -53,17 +51,16 @@ func (session *Session) GetNetworkInfo() (int32, uint64) {
 
 
 
-func (session *Session) SetUserID(userID []byte){
-	session.UserIDLength = int8(len(userID))
-	copy(session.UserID[:], userID)
+func (session *Session) SetUserID(userID string){
+	session.UserID = userID
 }
 
-func (session *Session) GetUserID() []byte {
-	return session.UserID[0:session.UserIDLength]
+func (session *Session) GetUserID() string {
+	return session.UserID
 }
 
-func (session *Session) GetUserIDLength() int8{
-	return session.UserIDLength
+func (session *Session) GetUserIDLength() int{
+	return len(session.UserID)
 }
 
 
@@ -77,14 +74,14 @@ func (session *Session) GetConnectTimeSecond() int64{
 	return atomic.LoadInt64(&session.ConnectTimeSecond)
 }
 
-func (session *Session) SetUser(sessionUserID uint64, userID []byte, currentTimeSecond int64){
+func (session *Session) SetUser(sessionUserID uint64, userID string, currentTimeSecond int64){
 	session.SetUserID(userID)
 	session.SetRoomNumber(sessionUserID, -1,  currentTimeSecond )
 
 }
 
 func (session *Session) IsAuthorized () bool{
-	if session.UserIDLength > 0 {
+	if session.UserID != "" {
 		return true
 	}
 	return false
@@ -105,8 +102,8 @@ func (session *Session) SetRoomEntering(roomNum int32) bool {
 }
 
 func (session *Session) SetRoomNumber(sessionUniqueID uint64, roomNum int32, curTimeSec int64) bool {
-	if roomNum == -1 {
 
+	if roomNum == -1 {
 		atomic.StoreInt32(&session.RoomNumber, roomNum)
 		atomic.StoreInt32(&session.RoomNumberOfEntering, roomNum)
 	}

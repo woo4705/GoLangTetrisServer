@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bytes"
 	"chatServer/connectedSession"
 	"chatServer/protocol"
 	"go.uber.org/zap"
@@ -32,6 +31,7 @@ func (server *GameServer) DistributePacket(sessionIndex int32, sessionUniqueID u
 func (server *GameServer) PacketProcess_goroutine() {
 	NetLib.NTELIB_LOG_DEBUG("start PacketProcess goroutine")
 
+	//특정 panic에 따른 처리를 넣고싶다면 아래의 구조를 수정하자
 	for{
 		if server.PacketProcess_goroutine_Impl() {
 			NetLib.NTELIB_LOG_INFO("Wanted Stop PacketProcess goroutine")
@@ -84,7 +84,7 @@ func ProcessPacketLogin(sessionIndex int32, sessionUniqueID uint64, bodySize int
 		return
 	}
 
-	userID := bytes.Trim(reqPacket.UserID[:], "\x00")
+	userID := reqPacket.UserID
 
 	if len(userID) <= 0 {
 		SendLoginResult(sessionIndex, sessionUniqueID, protocol.ERROR_CODE_LOGIN_USER_INVALID_ID)
@@ -146,7 +146,16 @@ func ProcessRoomEnterRequest(server *GameServer, sessionIndex int32, sessionUniq
 
 
 func ProcessPacketSesssionClosed(server *GameServer, sessionIndex int32, sessionUniqueID uint64){
+
+	//먼저 로그인한 유저인지 확인. 로그인한 유저가 아니라면 바로 아래의 조건문에서 처리
+	if connectedSession.IsLoginUser(sessionIndex) == false {
+		NetLib.NTELIB_LOG_INFO("DisConnectClient", zap.Int32("sessionIndex",sessionIndex))
+		connectedSession.RemoveSession(sessionIndex, false)
+		return
+	}
+
 	roomNumber,_ := connectedSession.GetRoomNumber(sessionIndex)
+
 
 	if roomNumber > -1 {
 		packet := protocol.Packet{

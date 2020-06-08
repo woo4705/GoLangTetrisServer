@@ -41,6 +41,9 @@ func AddSession(sessionIndex int32, sessionUniqueID uint64) bool{
 		return false
 	}
 
+	//ConnectTimeSecond가 해당 세션이 이미 연결된 것인지 아닌지 확인하는 용도로 사용된다.
+	//하지만 이것은 굳이 time값 아니여도 bool값이나 다른 값들로 확인할 수 있지 않을까..? timesecond를 쓰는 이유 알아보기
+
 	if global_sessionManager.SessionList[sessionIndex].GetConnectTimeSecond() > 0 {
 		NetLib.NTELIB_LOG_ERROR("already connected session", zap.Int32("sessionIndex",sessionIndex) )
 		return false
@@ -91,10 +94,10 @@ func GetNetworkUniqueID(sessionIndex int32) uint64{
 	return global_sessionManager.SessionList[sessionIndex].GetNetworkUniqueID()
 }
 
-func GetUserID(sessionIndex int32) ([]byte, bool){
+func GetUserID(sessionIndex int32) (string, bool){
 	if ValidSessionIndex(sessionIndex) == false {
 		NetLib.NTELIB_LOG_ERROR("Invalid sessionIndex", zap.Int32("sessionIndex",sessionIndex))
-		return nil,false
+		return "",false
 	}
 
 	return global_sessionManager.SessionList[sessionIndex].GetUserID(),true
@@ -102,20 +105,20 @@ func GetUserID(sessionIndex int32) ([]byte, bool){
 
 
 
-func SetLogin(sessionIndex int32, sessionUniqueID uint64, userID []byte, curTimeSec int64) bool {
+func SetLogin(sessionIndex int32, sessionUniqueID uint64, userID string, curTimeSec int64) bool {
 	if ValidSessionIndex(sessionIndex) == false {
 		NetLib.NTELIB_LOG_ERROR("Invalid sessionIndex", zap.Int32("sessionIndex",sessionIndex))
 		return false
 	}
 
-	newUserID := string(userID)
-	if _, ok:= global_sessionManager.UserIDSessionMap.Load(newUserID); ok{
+
+	if _, ok:= global_sessionManager.UserIDSessionMap.Load(userID); ok{
 		//중복로그인
 		return false
 	}
 
 	global_sessionManager.SessionList[sessionIndex].SetUser(sessionUniqueID, userID, curTimeSec)
-	global_sessionManager.UserIDSessionMap.Store(newUserID, global_sessionManager.SessionList[sessionIndex])
+	global_sessionManager.UserIDSessionMap.Store(userID, global_sessionManager.SessionList[sessionIndex])
 
 	atomic.AddInt32(&global_sessionManager.CurrentLoginUserCount, 1)
 
