@@ -22,8 +22,9 @@ public class LobbySceneManager : MonoBehaviour
         Text userIDText = GameObject.Find("id_txt").GetComponent<Text>();
         
         roomEnterRes = new RoomEnterResPacket();
+        roomEnterRes.Result = ERROR_CODE.DUMMY_CODE;
         userIDText.text = GameNetworkServer.Instance.LocalUserID;
-        
+        isWatingEnterRoomRes = false;
         
         if (errorMsgBox != null)
         {
@@ -49,7 +50,7 @@ public class LobbySceneManager : MonoBehaviour
                 return;
             }
 
-            if (roomEnterRes.Result == ERROR_CODE.NONE)
+            if (roomEnterRes.Result == ERROR_CODE.NONE  )
             {
                 GameNetworkServer.Instance.ClientStatus = GameNetworkServer.CLIENT_STATUS.ROOM;
                 SceneManager.LoadScene("Game");
@@ -89,6 +90,16 @@ public class LobbySceneManager : MonoBehaviour
         Debug.Log("RoomEnterReqPacket sended");
        
     }
+    
+    
+    
+    public void CloseErrorMsg()
+    {
+        errorMsgBox.SetInactive();
+       
+        //사용자가 오류를 확인했으므로 에러창을 띄우게 하는 요인을 초기화시켜줌 
+        roomEnterRes.Result = ERROR_CODE.DUMMY_CODE;
+    } 
 
     
 }

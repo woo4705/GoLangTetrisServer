@@ -53,8 +53,9 @@ public class LoginSceneManager : MonoBehaviour
                 
                 errorMsgBox.PopUpErrorMessage("[로그인 오류] 오류코드:"+ loginResult);
                 isLoginReqPktSended = false;
-                
+
             }
+            
         }
 
     }
@@ -88,6 +89,15 @@ public class LoginSceneManager : MonoBehaviour
         Debug.Log("LoginReqPacket sended");
         
     }
+
+
+    public void CloseErrorMsg()
+    {
+        errorMsgBox.SetInactive();
+       
+        //사용자가 오류를 확인했으므로 에러창을 띄우게 하는 요인을 초기화시켜줌 
+        loginResult = (Int16)ERROR_CODE.DUMMY_CODE;
+    } 
     
     
 }

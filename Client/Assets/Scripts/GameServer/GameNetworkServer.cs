@@ -228,9 +228,8 @@ namespace GameNetwork
 
 
         // 게임플레이 네트워크 부분
-        public void SendGameReadyPacket(GameReadyRequestPacket packet)
+        public void SendGameReadyPacket()
         {
-            var request = packet;
             PostSendPacket(PACKET_ID.GAME_READY_REQ, null);
         }
 
@@ -244,10 +243,11 @@ namespace GameNetwork
         public void SendGameEndPacket(GameEndRequestPacket packet)
         {
             var request = packet;
-            PostSendPacket(PACKET_ID.GameEndReqPkt, null);
+            PostSendPacket(PACKET_ID.GAME_END_REQ, null);
         }
-        
-        
+
+
+
         
         
         
@@ -281,8 +281,7 @@ namespace GameNetwork
             }
             SendPacketQueue.Enqueue(dataSource.ToArray());
         }
-
-
+       
         
         void NetworkReadProcess()
         {

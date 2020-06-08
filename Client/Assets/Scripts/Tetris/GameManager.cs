@@ -31,30 +31,32 @@ public class GameManager : MonoBehaviour {
     public bool InputAllowed = true;
     public Single FallSpeed = 1f;
     public Int32 GameLevel = 0;
-    public InputField myInputField;
-    public bool isGameOver = false;
+    public bool isGameOverNtfArrived {get; set; } = false;
+    public GAME_RESULT GameResult {get; set; }
+    
+    public GameObject[] GameOverPanel;
 
-
-    public Int32 RivalScoreValue = 0;
-    public Int32 RivalLineValue = 0;
-    public Int32 RivalGameLevel = 0;
-
+    
     void Awake()
     {
         if(instance)
         {
-            DestroyImmediate(gameObject);
             return;
         }
         instance = this;
-        DontDestroyOnLoad(gameObject);
     }
     // Use this for initialization
-    void Start () {
-        GameObject sm = GameObject.FindGameObjectWithTag("SettingsMenu");
-        if(sm!=null) DontDestroyOnLoad(sm);
+
+
+    private void Update()
+    {
+        if (isGameOverNtfArrived == true)
+        {
+            GameOverFn(GameResult);
+            isGameOverNtfArrived = false;
+        }
     }
-	
+
 
     public void ScreenFlash()
     {
@@ -65,6 +67,8 @@ public class GameManager : MonoBehaviour {
         go.GetComponent<Camera>().backgroundColor = Color.Lerp(Color.black,Color.white,2.5f);
         go.GetComponent<Camera>().backgroundColor = Color.black;
     }
+    
+    
     IEnumerator LerpColor()
     {
         for (int c = 0; c <= 4; c++) { 
@@ -85,5 +89,32 @@ public class GameManager : MonoBehaviour {
         go.GetComponent<Camera>().backgroundColor = Color.black;
         yield return true;
         }
+    }
+    
+    
+    
+    //GameOverPanel
+    public void GameOverFn(GAME_RESULT GameResult)
+    {
+        Debug.Log("GameOverFn() fired!");
+
+        GameObject gameUI = GameObject.FindGameObjectWithTag("gsui");
+        Instantiate(GameOverPanel[0], new Vector2(0,0),Quaternion.identity);
+        GameObject gameOverPanel = GameObject.Find("GameOverPanel(Clone)");
+        gameOverPanel.transform.parent = gameUI.transform;
+        gameOverPanel.transform.SetPositionAndRotation(new Vector2(920, 500), Quaternion.identity);
+        
+        
+        GameObject gameOverText = GameObject.Find("WIN_or_LOSE");
+
+        if (GameResult == GAME_RESULT.WIN)
+        {
+            gameOverText.GetComponent<Text>().text = "YOU WIN!!";
+        }
+        else
+        {
+            gameOverText.GetComponent<Text>().text = "YOU LOSE...";
+        }
+        
     }
 }

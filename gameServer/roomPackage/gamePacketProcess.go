@@ -66,3 +66,41 @@ func (room *BaseRoom) PacketProcess_Game_Sync_Req(user *RoomUser, packet protoco
 	room.BroadCastPacket(packetSize, sendBuf, user.NetSessionUniqueID)
 	return protocol.ERROR_CODE_NONE
 }
+
+
+
+
+func (room *BaseRoom) PacketProcess_GameEndRequest(user *RoomUser, packet protocol.Packet) int16{
+	sessionIndex := packet.UserSessionIndex
+	sessionUniqueID := packet.UserSessionUniqueID
+
+	//TODO: 임시로 요청에 대한 응답을 모두 ERROR_CODE_NONE으로 하였는데 이후 예외상황에 따라 오류를 반환하는 경우가 추가될 수 있음
+	SendGameEndResult(sessionIndex, sessionUniqueID , protocol.ERROR_CODE_NONE)
+	SendGameNotifyLose(sessionIndex, sessionUniqueID)
+
+	var ntfPacket_Win protocol.GameEndNotifyPacket
+	ntfPacket_Win.GameResult = protocol.GAME_RESULT_WIN
+	ntfWinPktBuf, packetSize := ntfPacket_Win.EncodingPacket()
+	room.BroadCastPacket(packetSize, ntfWinPktBuf, sessionUniqueID)
+
+	return protocol.ERROR_CODE_NONE
+
+}
+
+
+func SendGameEndResult(sessionIndex int32, sessionUniqueID uint64, result int16) {
+	var resPacket  protocol.GameEndResponsePacket
+	resPacket.Result = result
+	resPktBuf, _ := resPacket.EncodingPacket()
+
+	NetLib.NetLibIPostSendToClient(sessionIndex, sessionUniqueID, resPktBuf)
+}
+
+
+func SendGameNotifyLose(sessionIndex int32, sessionUniqueID uint64){
+	var ntfPacket_Lose protocol.GameEndNotifyPacket
+	ntfPacket_Lose.GameResult = protocol.GAME_RESULT_LOSE
+	ntfLosePktBuf, _ := ntfPacket_Lose.EncodingPacket()
+
+	NetLib.NetLibIPostSendToClient(sessionIndex, sessionUniqueID, ntfLosePktBuf)
+}

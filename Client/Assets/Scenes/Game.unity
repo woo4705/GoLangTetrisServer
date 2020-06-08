@@ -669,7 +669,7 @@ Transform:
   m_LocalScale: {x: 3, y: 85, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 12
+  m_RootOrder: 11
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!212 &361410105
 SpriteRenderer:
@@ -721,36 +721,6 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
---- !u!1 &400506530
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 400506531}
-  m_Layer: 0
-  m_Name: Setting
-  m_TagString: SettingsMenu
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &400506531
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 400506530}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 943.46906, y: 145.642, z: -378.32376}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_RootOrder: 7
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &493344569
 GameObject:
   m_ObjectHideFlags: 0
@@ -946,7 +916,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 9
+  m_RootOrder: 8
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &612463127
 GameObject:
@@ -989,7 +959,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 13
+  m_RootOrder: 12
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &699002116
 GameObject:
@@ -1228,7 +1198,18 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 724667530}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 1589956242}
+        m_MethodName: CloseErrorMsg
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &724667530
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1809,7 +1790,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: 116.99999}
+  m_AnchoredPosition: {x: 0, y: 117.00004}
   m_SizeDelta: {x: 0, y: 300}
   m_Pivot: {x: 0, y: 1}
 --- !u!1 &1152945427
@@ -2328,11 +2309,9 @@ MonoBehaviour:
   InputAllowed: 1
   FallSpeed: 1
   GameLevel: 0
-  myInputField: {fileID: 0}
   isGameOver: 0
-  RivalScoreValue: 0
-  RivalLineValue: 0
-  RivalGameLevel: 0
+  GameOverPanel:
+  - {fileID: 1130898898121838, guid: f363a645f11539444a5bbf5e588a2526, type: 3}
 --- !u!1 &1340332733
 GameObject:
   m_ObjectHideFlags: 0
@@ -2504,7 +2483,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 1687400218}
   m_Direction: 2
   m_Value: 0
-  m_Size: 0.6090043
+  m_Size: 0.61
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -2656,8 +2635,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 19abaa86abafc8a4a8c98b2115482f3e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  GameOverPanel:
-  - {fileID: 1130898898121838, guid: f363a645f11539444a5bbf5e588a2526, type: 3}
   groups:
   - {fileID: 4695309160635640651, guid: 5647e9429f951a7458831a7b98a5e668, type: 3}
   - {fileID: 2775634369774342520, guid: 5b1eeb8c98b5a764f91e09737a7f247d, type: 3}
@@ -2808,7 +2785,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 10
+  m_RootOrder: 9
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1589956244
 MonoBehaviour:
@@ -3598,7 +3575,7 @@ Transform:
   m_LocalScale: {x: 3, y: 85, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 11
+  m_RootOrder: 10
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!212 &2011244881
 SpriteRenderer:
@@ -3758,7 +3735,7 @@ Transform:
   m_Children:
   - {fileID: 1919297261}
   m_Father: {fileID: 0}
-  m_RootOrder: 8
+  m_RootOrder: 7
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &2066788628
 MonoBehaviour:

@@ -158,8 +158,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 17.383911, y: 65}
-  m_SizeDelta: {x: -1793.2317, y: -706.978}
+  m_AnchoredPosition: {x: 4.5200195, y: 101.75}
+  m_SizeDelta: {x: -1757.2036, y: -809.9155}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &105545034
 MonoBehaviour:
@@ -1103,7 +1103,18 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1134597840}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 1665723339}
+        m_MethodName: CloseErrorMsg
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &1134597840
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1480,6 +1491,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 583959c9d4c2d0d489e07991ee577d75, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  Local_RoomUserUniqueID: 0
+  LocalUserID: 
 --- !u!4 &2096963555
 Transform:
   m_ObjectHideFlags: 0

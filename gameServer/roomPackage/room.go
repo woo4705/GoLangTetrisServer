@@ -80,6 +80,7 @@ func (room *BaseRoom) SettingPacketFunction() {
 	room.AddPacketFunction(protocol.PACKET_ID_ROOM_CHAT_REQ, room.PacketProcess_Chat)
 	room.AddPacketFunction(protocol.PACKET_ID_GAME_READY_REQ, room.PacketProcess_GameReadyRequest)
 	room.AddPacketFunction(protocol.PACKET_ID_GAME_SYNC_REQ, room.PacketProcess_Game_Sync_Req)
+	room.AddPacketFunction(protocol.PACKET_ID_GAME_END_REQ, room.PacketProcess_GameEndRequest)
 
 }
 
@@ -248,3 +249,4 @@ func (room *BaseRoom) IsDisconnectedUser(sessionUniqueID uint64) int16 {
 
 	return  protocol.ERROR_CODE_NONE
 }
+

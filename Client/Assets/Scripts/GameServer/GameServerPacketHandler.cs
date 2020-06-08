@@ -46,6 +46,11 @@ namespace GameNetwork
                         ProcessGameUserStatusNotify(packet);
                         break;
                     }
+                case PACKET_ID.ROOM_LEAVE_RES:
+                    {
+                        ProcessLeaveRoomResponse(packet);
+                        break;
+                    }
 
                 case PACKET_ID.GAME_START_NTF:
                     {
@@ -59,13 +64,13 @@ namespace GameNetwork
                         break;
                     }
 
-                case PACKET_ID.GameEndResPkt:
+                case PACKET_ID.GAME_END_RES:
                     {
                         ProcessGameEndResponse(packet);
                         break;
                     }
 
-                case PACKET_ID.GameEndNtfPkt:
+                case PACKET_ID.GAME_END_NTF:
                     {
                         ProcessGameEndNotify(packet);
                         break;  
@@ -115,8 +120,11 @@ namespace GameNetwork
             var response = GameSceneManager.roomLeaveResPkt;
             response.FromBytes(packet.BodyData);
 
+            Debug.Log("방 퇴장 요청에대한 응답패킷을 받음");
+            
             if (response.Result == ERROR_CODE.NONE)
             {
+                LobbySceneManager.roomEnterRes.Result = ERROR_CODE.DUMMY_CODE;
                 GameNetworkServer.Instance.InitRoomUserInfo();
                 GameNetworkServer.Instance.Local_RoomUserUniqueID = 0;
             }
@@ -138,12 +146,8 @@ namespace GameNetwork
             Debug.Log("[ProcessRoomUserListNotify] UserUniqueIdList[0]="+notify.UserUniqueIdList[0]);
             Debug.Log("[ProcessRoomUserListNotify] UserUniqueIdList[0]="+notify.UserStatusList[0]);
             
-            
-            //GameNetworkServer.Instance
             GameNetworkServer.Instance.AddUserInfo(notify.UserUniqueIdList[0], notify.UserIDList[0], notify.UserStatusList[0]);
-            
-            //GameSceneManager.isRemoteUserInRoom = true;
-            //GameSceneManager.isRemoteUserInfoNeedUpdate = true;
+
         }
 
 
@@ -252,13 +256,25 @@ namespace GameNetwork
         {
             var response = new GameEndResponsePacket();
             response.FromBytes(packet.BodyData);
-            //TODO Result에 따른 처리 구현하기
+            
+            if (response.Result != ERROR_CODE.NONE)
+            {
+                Debug.Log("게임오버 패킷요청 실패");
+            }
+
+            
         }
 
         static void ProcessGameEndNotify(PacketData packet)
         {
             Spawner.isGameEndPacketArrived = true;
-            GameNetworkServer.Instance.Disconnect();
+            var notify = new GameEndNotifyPacket();
+            notify.FromBytes(packet.BodyData);
+            
+            //아래의 부분을 main Thread에서 부르도록 수정하기
+            GameManager.Instance.GameResult = (GAME_RESULT)notify.GameResult;
+            GameManager.Instance.isGameOverNtfArrived = true;
+
         }
     }
 }

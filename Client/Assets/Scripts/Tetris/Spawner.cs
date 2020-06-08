@@ -16,8 +16,10 @@ public class Spawner : MonoBehaviour {
     public static bool isGameStart { get; set; } = false;
     public static bool isGameRunning { get; set; } = false;
     public static bool isGameEndPacketArrived { get; set; } = false;
+    
+    public static GAME_RESULT GameResult { get; set; }
 
-    public GameObject[] GameOverPanel;
+    
     // Use this for initialization
     void Start ()
     {
@@ -36,7 +38,7 @@ public class Spawner : MonoBehaviour {
 
         if(isGameEndPacketArrived == true)
         {
-            GameOverFn();
+            GameManager.Instance.GameOverFn(GameResult);
             isGameRunning = false;
             isGameEndPacketArrived = false;
         }
@@ -60,16 +62,5 @@ public class Spawner : MonoBehaviour {
     //    ShadowGrid.SpawnShadow(shadowgroups[i],spawned);
     }
 
-    //GameOverPanel
-    public void GameOverFn()
-    {
-        Debug.Log("GameOverFn() fired!");
-        GameManager.Instance.isGameOver = true;
-
-        GameObject gsui = GameObject.FindGameObjectWithTag("gsui");
-        Instantiate(GameOverPanel[0], new Vector2(0,0),Quaternion.identity);
-        GameObject gopactual = GameObject.Find("GameOverPanel(Clone)");
-        gopactual.transform.parent = gsui.transform;
-        gopactual.transform.SetPositionAndRotation(new Vector2(920, 500), Quaternion.identity);
-    }
+    
 }

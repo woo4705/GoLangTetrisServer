@@ -36,9 +36,9 @@ public class Group : MonoBehaviour
         // Default position not valid? Then it's game over
        if (!isValidGridPos())
         {
-            GameObject gop = GameObject.FindGameObjectWithTag("spawner");
+            GameObject spawner = GameObject.FindGameObjectWithTag("spawner");
             GameNetworkServer.Instance.SendGameEndPacket(new GameEndRequestPacket());
-            gop.GetComponent<Spawner>().GameOverFn();
+  
             Destroy(gameObject);
         }
 
@@ -239,7 +239,7 @@ public class Group : MonoBehaviour
                 Grid.grid[(int)v.x, (int)v.y].parent != transform)
                 return false;
         }
-        GameManager.Instance.isGameOver = false;
+       // GameManager.Instance.isGameOver = false;
         return true;
     }
 

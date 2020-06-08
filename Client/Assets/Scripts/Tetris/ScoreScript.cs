@@ -15,7 +15,6 @@ using System.Text;
 public class ScoreScript : MonoBehaviour
 {
     private string ScoreDisplay = "";
-    private string HighScoreDisplay = "";
     public Text ScoreLabel;
     public Text HighScoreLabel;
     public Text PlayerLabel;

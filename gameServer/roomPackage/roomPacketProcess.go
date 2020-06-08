@@ -198,5 +198,3 @@ func SendRoomChatResult(sessionIndex int32, sessionUniqueID uint64, result int16
 	NetLib.NetLibIPostSendToClient(sessionIndex, sessionUniqueID, sendPacket)
 }
 
-
-

@@ -73,6 +73,7 @@ public class GameSceneManager : MonoBehaviour
             if (roomLeaveResPkt.Result == ERROR_CODE.NONE)
             {
                 GameNetworkServer.Instance.ClientStatus = GameNetworkServer.CLIENT_STATUS.LOGIN;
+               
                 SceneManager.LoadScene("Lobby");
             }
             else
@@ -201,10 +202,6 @@ public class GameSceneManager : MonoBehaviour
              (GameObject.FindGameObjectWithTag("RemoteReadyLabel")).GetComponent<Text>().text = "";
          }
      }
-    
-     
-    
-
      
      
      
@@ -239,13 +236,12 @@ public class GameSceneManager : MonoBehaviour
                 GameNetworkServer.Instance.ConnectToServer();
             }
 
-            GameNetworkServer.Instance.SendGameReadyPacket(request);
+            GameNetworkServer.Instance.SendGameReadyPacket();
         }
 
     }
 
-
-
+    
     public void SendLeaveRequest()
     {
 
@@ -255,6 +251,15 @@ public class GameSceneManager : MonoBehaviour
 
         }
     }
+    
+    
+    public void CloseErrorMsg()
+    {
+        errorMsgBox.SetInactive();
+       
+        //사용자가 오류를 확인했으므로 에러창을 띄우게 하는 요인을 초기화시켜줌 
+        roomLeaveResPkt.Result = ERROR_CODE.DUMMY_CODE;
+    } 
 
 
 

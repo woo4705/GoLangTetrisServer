@@ -19,6 +19,13 @@ const (
 	MAX_CHAT_MESSAGE_BYTE_LENGTH = 257
 )
 
+const (
+	GAME_RESULT_WIN = 1
+	GAME_RESULT_LOSE = 0
+)
+
+
+
 type Header struct {
 	TotalSize	int16
 	ID			int16
