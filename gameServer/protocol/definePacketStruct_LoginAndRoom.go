@@ -14,20 +14,7 @@ type LoginRequestPacket struct {
 	UserID string
 	UserPW string
 }
-/*
-func (packet LoginRequestPacket) EncodingPacket() ([]byte, int16){
-	totalPacketSize := public_clientSessionHeaderSize + MAX_USER_ID_BYTE_LENGTH + MAX_USER_PW_BYTE_LENGTH
-	sendBuf := make([]byte,totalPacketSize)
 
-	writer := NetLib.MakeWriter(sendBuf,true)
-	EncodingPacketHeader(&writer,totalPacketSize,PACKET_ID_LOGIN_REQ,0)
-
-	//writer.WriteBytes(packet.UserID[:])
-	//writer.WriteBytes(packet.UserPW[:])
-
-	return sendBuf, totalPacketSize
-}
-*/
 
 func (packet *LoginRequestPacket) DecodingPacket(bodyData []byte) bool {
 
@@ -141,12 +128,14 @@ func (packet *RoomEnterResponsePacket) DecodingPacket(bodyData []byte) bool {
 
 
 //RoomUserListData Packet
+/*
 type RoomUserData struct {
-	UniqueID uint64
-	IDLen	 int8
-	ID		 []byte
-	Status	 int16
+
+	SessionUniqueID uint64
+	ID		 		string
+	Status	 		int16
 }
+*/
 
 type RoomUserListNotifyPacket struct{
 	UserCount int8

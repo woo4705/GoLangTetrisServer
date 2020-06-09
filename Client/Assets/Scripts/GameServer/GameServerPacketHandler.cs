@@ -130,8 +130,13 @@ namespace GameNetwork
             }
 
         }
-        
-        
+
+
+
+        static void ProcessLeaveRoomNotify(PacketData packet)
+        {
+            
+        }
         
         
         
@@ -140,13 +145,17 @@ namespace GameNetwork
             var notify = new RoomUserListNotifyPacket();
             notify.FromBytes(packet.BodyData);
             
-            // 테트리스 대전방에는 2명을 최대로 고정하는것 생각했기에, 하드코딩이 들어가있다.
+            // 테트리스 대전방에는 2명을 최대로 고정하는것 생각했기에, 하드코딩이 들어가있다. 만약 Room에서 수용되는 인원수가 늘어난다면 구조가 변경되어야함
             Debug.Log("[ProcessRoomUserListNotify] roomUserCnt="+notify.UserCount);
             Debug.Log("[ProcessRoomUserListNotify] UserIDList[0]="+notify.UserIDList[0]);
             Debug.Log("[ProcessRoomUserListNotify] UserUniqueIdList[0]="+notify.UserUniqueIdList[0]);
             Debug.Log("[ProcessRoomUserListNotify] UserUniqueIdList[0]="+notify.UserStatusList[0]);
             
             GameNetworkServer.Instance.AddUserInfo(notify.UserUniqueIdList[0], notify.UserIDList[0], notify.UserStatusList[0]);
+            if (notify.UserStatusList[0] == (Int16) GAME_USER_STATUS.READY)
+            {
+                GameSceneManager.isRemoteReadyON_MsgArrived = true;
+            }
 
         }
 
@@ -205,7 +214,7 @@ namespace GameNetwork
 
             if (notify.RoomUserUniqueID == GameNetworkServer.Instance.Local_RoomUserUniqueID)
             {
-                if (notify.UserStatus == 2)
+                if (notify.UserStatus == (Int16)GAME_USER_STATUS.READY)
                 {
                     Debug.Log("UserStatusReady");
                     GameSceneManager.isLocalReadyON_MsgArrived = true;
@@ -218,7 +227,7 @@ namespace GameNetwork
             }
             else
             {
-                if (notify.UserStatus == 2)
+                if (notify.UserStatus == (Int16)GAME_USER_STATUS.READY)
                 {
                     Debug.Log("UserStatusReady");
                     GameSceneManager.isRemoteReadyON_MsgArrived = true;
@@ -267,12 +276,14 @@ namespace GameNetwork
 
         static void ProcessGameEndNotify(PacketData packet)
         {
-            Spawner.isGameEndPacketArrived = true;
             var notify = new GameEndNotifyPacket();
             notify.FromBytes(packet.BodyData);
             
             //아래의 부분을 main Thread에서 부르도록 수정하기
             GameManager.Instance.GameResult = (GAME_RESULT)notify.GameResult;
+            
+            Debug.Log("GameManager.Instance.GameResult:"+GameManager.Instance.GameResult);
+            
             GameManager.Instance.isGameOverNtfArrived = true;
 
         }

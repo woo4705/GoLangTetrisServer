@@ -8,6 +8,7 @@ import (
 	"sync/atomic"
 )
 
+
 type BaseRoom struct {
 	Index					int32
 	Number					int32
@@ -24,8 +25,19 @@ type BaseRoom struct {
 	EnterUserNotify			func(int64, int32)
 	LeaveUserNotify			func(int64)
 
-	ReadyUserCount			int
 }
+
+
+func (room *BaseRoom) Initialize(index int32, config RoomConfig){
+	room.Number = config.StartRoomNumber + index
+	room.Index = index
+	room.Config = config
+
+	room.InitUserPool()
+	room.UserSessionUniqueIDMap = make(map[uint64]*RoomUser)
+
+}
+
 
 
 func (room *BaseRoom) GetIndex() int32 {
@@ -49,19 +61,6 @@ func (room *BaseRoom) GenerateUserUniqueID() uint64 {
 
 
 
-func (room *BaseRoom) Initialize(index int32, config RoomConfig){
-	room.Number = config.StartRoomNumber + index
-	room.Index = index
-	room.Config = config
-
-	room.InitUserPool()
-	room.UserSessionUniqueIDMap = make(map[uint64]*RoomUser)
-
-	room.ReadyUserCount = 0
-}
-
-
-
 func (room *BaseRoom) ISUserCanEnter() bool {
 	if room.GetCurrentUserCount() >= room.Config.MaxRoomCount {
 		return false
@@ -75,7 +74,6 @@ func (room *BaseRoom) SettingPacketFunction() {
 	room.FuncList = make([]func(*RoomUser, protocol.Packet)int16, 0, maxFunctionListCount)
 	room.FuncPacketIDList = make([]int16, 0, maxFunctionListCount)
 
-	room.AddPacketFunction(protocol.PACKET_ID_ROOM_ENTER_REQ, room.PacketProcess_EnterUser)
 	room.AddPacketFunction(protocol.PACKET_ID_ROOM_LEAVE_REQ, room.PacketProcess_LeaveUser)
 	room.AddPacketFunction(protocol.PACKET_ID_ROOM_CHAT_REQ, room.PacketProcess_Chat)
 	room.AddPacketFunction(protocol.PACKET_ID_GAME_READY_REQ, room.PacketProcess_GameReadyRequest)
@@ -125,7 +123,7 @@ func (room *BaseRoom) AddUser(userInfo AddRoomUserInfo) (*RoomUser, int16){
 	user := room.GetUserObject()
 	user.Init(userInfo.userID, room.GenerateUserUniqueID())
 	user.SetNetworkInfo(userInfo.NetSessionIndex, userInfo.NetSessionUniqueID)
-	user.packetDataSize = user.PacketDataSize()
+	user.UserPacketDataSize = user.GetUserPacketDataSize()
 
 	room.UserSessionUniqueIDMap[user.NetSessionUniqueID] = user
 
@@ -172,16 +170,19 @@ func (room *BaseRoom) GetUser(sessionUniqueID uint64) *RoomUser {
 }
 
 
-
-func (room *BaseRoom) AllocAllUserInfo(exceptSessionUniqueID uint64) (userCount int8, dataSize int16, dataBuffer []byte) {
+// User마다 ID의 길이가 달라, 각각 User별 dataSize의 정보 또한 기록한다.
+func (room *BaseRoom) GetAllUserInfoBuffer(exceptSessionUniqueID uint64) (userCount int8, dataSize int16, dataBuffer []byte) {
 	for _, user := range room.UserSessionUniqueIDMap {
 		if user.NetSessionUniqueID == exceptSessionUniqueID {
 			continue
 		}
 
 		userCount++
-		dataSize += user.packetDataSize
+		dataSize += user.UserPacketDataSize
 	}
+
+
+	dataSize += int16(userCount*2)
 
 	dataBuffer = make([]byte, dataSize)
 	writer := NetLib.MakeWriter(dataBuffer, true)
@@ -191,16 +192,16 @@ func (room *BaseRoom) AllocAllUserInfo(exceptSessionUniqueID uint64) (userCount 
 		if user.NetSessionUniqueID == exceptSessionUniqueID {
 			continue
 		}
+		writer.WriteS16(dataSize)
 		WriteUserInfo(&writer, user)
-
 	}
 
 	return userCount, dataSize, dataBuffer
 }
 
 
-func  (room *BaseRoom)AllocUserInfo(user *RoomUser) (dataSize int16, dataBuffer []byte){
-	dataSize = user.packetDataSize
+func  (room *BaseRoom)GetUserInfoBuffer(user *RoomUser) (dataSize int16, dataBuffer []byte){
+	dataSize = user.UserPacketDataSize
 	dataBuffer = make([]byte, dataSize)
 
 	writer := NetLib.MakeWriter(dataBuffer, true)
@@ -213,6 +214,7 @@ func  (room *BaseRoom)AllocUserInfo(user *RoomUser) (dataSize int16, dataBuffer 
 
 func WriteUserInfo(writer *NetLib.RawPacketData, user *RoomUser){
 	writer.WriteU64(user.RoomUniqueID)
+	writer.WriteS16(user.Status)
 	writer.WriteString(user.ID)
 }
 
@@ -249,3 +251,13 @@ func (room *BaseRoom) IsDisconnectedUser(sessionUniqueID uint64) int16 {
 	return  protocol.ERROR_CODE_NONE
 }
 
+
+
+func (room *BaseRoom) CheckAllUserIsReady() bool{
+	for _, user := range room.UserSessionUniqueIDMap {
+		if user.Status != USER_STATUS_READY{
+			return false
+		}
+	}
+	return true
+}

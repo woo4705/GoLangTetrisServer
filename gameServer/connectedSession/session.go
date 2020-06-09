@@ -10,10 +10,17 @@ type Session struct {
 
 	UserID 					string
 
-	ConnectTimeSecond		int64
+	IsUsing					int32
 	RoomNumber				int32
 	RoomNumberOfEntering	int32
 }
+
+const(
+	SESSION_IS_NOT_USING = 0
+	SESSION_IS_USING = 1
+)
+
+
 
 func (session *Session) Init(index int32){
 	session.Index = index
@@ -29,7 +36,7 @@ func (session *Session) ClearUserID(){
 func (session *Session) Clear(){
 	session.ClearUserID()
 	session.SetRoomNumber(0, -1,0)
-	session.SetConnectTimeSecond(0,0)
+	session.SetSessionIsUsing(SESSION_IS_NOT_USING, 0)
 }
 
 
@@ -65,14 +72,15 @@ func (session *Session) GetUserIDLength() int{
 
 
 
-func (session *Session) SetConnectTimeSecond(timeSec int64, uniqueID uint64){
-	atomic.StoreInt64(&session.ConnectTimeSecond, timeSec)
-	atomic.StoreUint64(&session.NetworkUniqueID, uniqueID)
+func (session *Session) SetSessionIsUsing( usingState int32, sessionUniqueID uint64 ){
+	atomic.StoreInt32(&session.IsUsing, usingState)
+	atomic.StoreUint64(&session.NetworkUniqueID,sessionUniqueID )
 }
 
-func (session *Session) GetConnectTimeSecond() int64{
-	return atomic.LoadInt64(&session.ConnectTimeSecond)
+func (session *Session) GetSessionIsUsing() int32{
+	return atomic.LoadInt32(&session.IsUsing)
 }
+
 
 func (session *Session) SetUser(sessionUserID uint64, userID string, currentTimeSecond int64){
 	session.SetUserID(userID)
@@ -80,7 +88,7 @@ func (session *Session) SetUser(sessionUserID uint64, userID string, currentTime
 
 }
 
-func (session *Session) IsAuthorized () bool{
+func (session *Session) IsLoggedInSession () bool{
 	if session.UserID != "" {
 		return true
 	}
@@ -101,6 +109,7 @@ func (session *Session) SetRoomEntering(roomNum int32) bool {
 	return true
 }
 
+
 func (session *Session) SetRoomNumber(sessionUniqueID uint64, roomNum int32, curTimeSec int64) bool {
 
 	if roomNum == -1 {
@@ -120,6 +129,8 @@ func (session *Session) SetRoomNumber(sessionUniqueID uint64, roomNum int32, cur
 
 	return true
 }
+
+
 
 func (session *Session) GetRoomNumber() (int32, int32) {
 	roomNum := atomic.LoadInt32(&session.RoomNumber)

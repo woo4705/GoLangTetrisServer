@@ -68,30 +68,19 @@ func (roomMgr *RoomManager) GetRoomUserCount(roomID int32) int32 {
 
 func (roomMgr *RoomManager) PacketProcess(roomNumber int32, packet protocol.Packet){
 	NetLib.NTELIB_LOG_DEBUG("[RoomManager - PacketProcess]", zap.Int16("PacketID", packet.ID))
-	isRoomEnterReq := false
-
-	if packet.ID == protocol.PACKET_ID_ROOM_ENTER_REQ {
-		isRoomEnterReq = true
-
-		var requestPacket protocol.RoomEnterRequestPacket
-		(&requestPacket).DecodingPacket(packet.Data)
-
-
-	}
-
 
 	room := roomMgr.GetRoomByNumber(roomNumber)
 	NetLib.NTELIB_LOG_DEBUG("[RoomManager - PacketProcess]",zap.Int32("roomNumber",roomNumber), zap.Int32("room Struct's number",room.GetNumber()))
 
 
 	if room == nil {
-		protocol.NotifyErrorPacket(packet.UserSessionIndex, packet.UserSessionUniqueID, protocol.ERROR_CODE_ROOM_INVALID_NUMBER )
+		protocol.NotifyErrorPacket(packet.RequestSessionIndex, packet.RequestSessionUniqueID, protocol.ERROR_CODE_ROOM_INVALID_NUMBER )
 		return
 	}
 
-	user := room.GetUser(packet.UserSessionUniqueID)
-	if user == nil && isRoomEnterReq == false {
-		protocol.NotifyErrorPacket(packet.UserSessionIndex, packet.UserSessionUniqueID, protocol.ERROR_CODE_ROOM_NOT_IN_USER)
+	user := room.GetUser(packet.RequestSessionUniqueID)
+	if user == nil {
+		protocol.NotifyErrorPacket(packet.RequestSessionIndex, packet.RequestSessionUniqueID, protocol.ERROR_CODE_ROOM_NOT_IN_USER)
 		return
 	}
 
@@ -117,6 +106,26 @@ func (roomMgr *RoomManager) PacketProcess(roomNumber int32, packet protocol.Pack
 
 
 
+// TODO: 방 입장을 요청한 유저가 들어갈 방 입장을 탐색할 때,아래의 단순한 Full-Search보다 탐색 범위를 줄일 수 있는 방법으로 개선하는것이 좋다.
+func (roomMgr *RoomManager)GetEmptyRoomToEnter() (enterRoomNum int32){
+	roomUserCntList := roomMgr.GetAllChannelUserCount()
+	roomMaxCnt := len(roomUserCntList)
+	roomNum  := -1
+
+	for i:=0; i<roomMaxCnt; i++ {
+		if roomUserCntList[i] < 2 {
+			roomNum  = i
+			break;
+		}
+	}
+
+	enterRoomNum = int32(roomNum)
+
+	return enterRoomNum
+}
+
+
+
 func LogStartRoomPacketProcess(maxRoomCount int32, config RoomConfig) {
 	NetLib.NTELIB_LOG_INFO("[RoomManager startRoomPacketProcess]",
 		zap.Int32("maxRoomCount", maxRoomCount),
@@ -124,3 +133,5 @@ func LogStartRoomPacketProcess(maxRoomCount int32, config RoomConfig) {
 		zap.Int32("MaxUserCount", config.MaxUserCount),
 	)
 }
+
+

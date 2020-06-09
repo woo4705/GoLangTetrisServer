@@ -15,7 +15,6 @@ public class Spawner : MonoBehaviour {
 
     public static bool isGameStart { get; set; } = false;
     public static bool isGameRunning { get; set; } = false;
-    public static bool isGameEndPacketArrived { get; set; } = false;
     
     public static GAME_RESULT GameResult { get; set; }
 
@@ -35,17 +34,10 @@ public class Spawner : MonoBehaviour {
             isGameStart = false;
             spawnNext();
         }
-
-        if(isGameEndPacketArrived == true)
-        {
-            GameManager.Instance.GameOverFn(GameResult);
-            isGameRunning = false;
-            isGameEndPacketArrived = false;
-        }
 	}
 
     // Groups (of Blocks that fall)
-    public  Group[] groups;
+    public Group[] groups;
     public ShadowGroup[] shadowgroups;
 
 

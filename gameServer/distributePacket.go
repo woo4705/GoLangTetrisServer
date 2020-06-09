@@ -15,8 +15,8 @@ func (server *GameServer) DistributePacket(sessionIndex int32, sessionUniqueID u
 		zap.Int32("sessionIndex", sessionIndex), zap.Uint64("sessionUniqueID",sessionUniqueID), zap.Int16("PacketID",packetID))
 
 	packet := protocol.Packet{ID: packetID}
-	packet.UserSessionIndex = sessionIndex
-	packet.UserSessionUniqueID = sessionUniqueID
+	packet.RequestSessionIndex = sessionIndex
+	packet.RequestSessionUniqueID = sessionUniqueID
 	packet.ID = packetID
 	packet.DataSize = bodySize
 	packet.Data = make([]byte, packet.DataSize)
@@ -49,11 +49,13 @@ func (server *GameServer) PacketProcess_goroutine_Impl() bool {
 
 	for{
 		packet := <- server.PacketChannel
-		sessionIndex := packet.UserSessionIndex
-		sessionUniqueID := packet.UserSessionUniqueID
+		sessionIndex := packet.RequestSessionIndex
+		sessionUniqueID := packet.RequestSessionUniqueID
 		bodySize := packet.DataSize
 		bodyData := packet.Data
 
+		// 아래의 함수는 몇몇의 경우가 아니라면 Room을 호출하여 패킷들을 처리한다.
+		// 현재 게임서버의 구조가, 거의 대부분의 작업들이 Room안에서 처리되기 때문. 만일 Room밖에서 처리되는 기능들이 많다면 구조가 변경될 수 있다.
 		if packet.ID == protocol.PACKET_ID_LOGIN_REQ {
 			ProcessPacketLogin(sessionIndex, sessionUniqueID, bodySize, bodyData)
 		}else if packet.ID == protocol.PACKET_ID_ROOM_ENTER_REQ {
@@ -63,8 +65,6 @@ func (server *GameServer) PacketProcess_goroutine_Impl() bool {
 		}else {
 			roomNumber,_ := connectedSession.GetRoomNumber(sessionIndex)
 			server.RoomMgr.PacketProcess(roomNumber, packet)
-			//위에서 connectedSession에서 해당 세션이 연결된 방의 번호를 불러온다.
-
 		}
 	}
 
@@ -75,7 +75,6 @@ func (server *GameServer) PacketProcess_goroutine_Impl() bool {
 
 func ProcessPacketLogin(sessionIndex int32, sessionUniqueID uint64, bodySize int16, bodyData []byte)  {
 	var reqPacket protocol.LoginRequestPacket
-
 	NetLib.NTELIB_LOG_DEBUG("Process Login Packet");
 
 
@@ -119,25 +118,16 @@ func ProcessRoomEnterRequest(server *GameServer, sessionIndex int32, sessionUniq
 
 	NetLib.NTELIB_LOG_DEBUG("Process Room Enter Packet");
 
-
 	if (&reqPacket).DecodingPacket(bodyData) == false {
 		SendLoginResult(sessionIndex, sessionUniqueID, protocol.ERROR_CODE_PACKET_DECODING_FAIL)
 		return
 	}
 
-	roomUserCntList := server.RoomMgr.GetAllChannelUserCount()
-	roomMaxCnt := len(roomUserCntList)
-	enterRoomNum := -1
+	enterRoomNum := server.RoomMgr.GetEmptyRoomToEnter()
+	room := server.RoomMgr.GetRoomByNumber(enterRoomNum)
 
-
-	for i:=0; i<roomMaxCnt; i++ {
-		if roomUserCntList[i] < 2 {
-			enterRoomNum = i
-			break;
-		}
-	}
-
-	server.RoomMgr.PacketProcess(int32(enterRoomNum), packet)
+	//packet
+	room.PacketProcess_EnterUser(packet)
 
 
 }
@@ -148,7 +138,7 @@ func ProcessRoomEnterRequest(server *GameServer, sessionIndex int32, sessionUniq
 func ProcessPacketSesssionClosed(server *GameServer, sessionIndex int32, sessionUniqueID uint64){
 
 	//먼저 로그인한 유저인지 확인. 로그인한 유저가 아니라면 바로 아래의 조건문에서 처리
-	if connectedSession.IsLoginUser(sessionIndex) == false {
+	if connectedSession.CheckSessionIsLoggedIn(sessionIndex) == false {
 		NetLib.NTELIB_LOG_INFO("DisConnectClient", zap.Int32("sessionIndex",sessionIndex))
 		connectedSession.RemoveSession(sessionIndex, false)
 		return

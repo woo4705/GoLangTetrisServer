@@ -19,10 +19,10 @@ func ParseConfigData() (NetLib.NetworkConfig, ConfigAppServer)  {
 	NetLib.NTELIB_LOG_INFO("[Setting NetworkConfig]")
 
 	appConfig := ConfigAppServer{
-		"chatServer",
+		"TetrisServer",
 		1000,
 		0,
-		4,
+		2,
 	}
 
 	netConfig := NetLib.NetworkConfig{}

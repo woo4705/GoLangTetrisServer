@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel;
 using System.Text;
+using UnityEngine;
 
 namespace GameNetwork
 {
@@ -80,8 +81,9 @@ namespace GameNetwork
     {
         public int UserCount = 0;
         public List<UInt64> UserUniqueIdList = new List<UInt64>();
-        public List<string> UserIDList = new List<string>();
         public List<Int16> UserStatusList = new List<Int16>();
+        public List<string> UserIDList = new List<string>();
+        
 
         public bool FromBytes(byte[] bodyData)
         {
@@ -91,21 +93,28 @@ namespace GameNetwork
 
             for (int i = 0; i < userCount; ++i)
             {
-                var uniqeudId = BitConverter.ToUInt64(bodyData, readPos);
-                readPos += 8;
-
-                var idlen = (SByte)bodyData[readPos];
-                ++readPos;
-
-                var id = Encoding.UTF8.GetString(bodyData, readPos, idlen);
-                readPos += idlen;
+                var userDataSize = BitConverter.ToInt16(bodyData, readPos);
+                readPos += 2;
+                Debug.Log("getuserDataSize = "+userDataSize);
                 
+                
+                var uniqueRoomId = BitConverter.ToUInt64(bodyData, readPos);
+                readPos += 8;
+                Debug.Log("uniqueRoomId");
+
                 var status = BitConverter.ToInt16(bodyData, readPos);
                 readPos += 2;
+                Debug.Log("userStatus");
+               
+                var userId = Encoding.UTF8.GetString(bodyData, readPos, userDataSize-12 );
+                readPos += userDataSize-10;
+                Debug.Log("userID");
+                
 
-                UserUniqueIdList.Add(uniqeudId);
-                UserIDList.Add(id);
+                UserUniqueIdList.Add(uniqueRoomId);
                 UserStatusList.Add(status);
+                UserIDList.Add(userId);
+                
                 
             }
 
@@ -119,8 +128,9 @@ namespace GameNetwork
     public class RoomNewUserNotifyPacket
     {
         public UInt64 UserUniqueId;
-        public string UserID;
         public Int16 UserStatus;
+        public string UserID;
+        
 
         public bool FromBytes(byte[] bodyData)
         {
@@ -128,15 +138,13 @@ namespace GameNetwork
 
             UserUniqueId = BitConverter.ToUInt64(bodyData, readPos);
             readPos += 8;
-
-            var idlen = (SByte)bodyData[readPos];
-            ++readPos;
-
-            UserID = Encoding.UTF8.GetString(bodyData, readPos, idlen);
-            readPos += idlen;
-
+            
+            
             UserStatus = BitConverter.ToInt16(bodyData, readPos);
             readPos += 2;
+            
+            UserID = Encoding.UTF8.GetString(bodyData, readPos, bodyData.Length-readPos);
+            
 
             return true;
         }

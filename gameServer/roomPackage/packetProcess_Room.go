@@ -9,11 +9,11 @@ import (
 )
 
 
-func (room *BaseRoom) PacketProcess_EnterUser(inValidUser *RoomUser, packet protocol.Packet) int16 {
+func (room *BaseRoom) PacketProcess_EnterUser(packet protocol.Packet) int16 {
 
 	curTime := NetLib.NetLib_GetCurrnetUnixTime()
-	sessionIndex := packet.UserSessionIndex
-	sessionUniqueID := packet.UserSessionUniqueID
+	sessionIndex := packet.RequestSessionIndex
+	sessionUniqueID := packet.RequestSessionUniqueID
 	roomNumber := room.GetNumber()
 
 	NetLib.NTELIB_LOG_INFO("[Room PacketProcess EnterUser]")
@@ -21,25 +21,19 @@ func (room *BaseRoom) PacketProcess_EnterUser(inValidUser *RoomUser, packet prot
 	var requestPacket protocol.RoomEnterRequestPacket
 	(&requestPacket).DecodingPacket(packet.Data)
 
-	userID, ok := connectedSession.GetUserID(sessionIndex)
-	if ok == false {
-		SendRoomEnterResult(sessionIndex, sessionUniqueID, -1,0, protocol.ERROR_CODE_ENTER_ROOM_INVALID_USER_ID)
-		return protocol.ERROR_CODE_ENTER_ROOM_INVALID_USER_ID
-	}
 
-	userInfo := AddRoomUserInfo{
-		userID,
-		sessionIndex,
-		sessionUniqueID,
+	addUserInfo, makeDataResult := MakeRoomUserDataToAdd(sessionIndex, sessionUniqueID)
+	if(makeDataResult != protocol.ERROR_CODE_NONE){
+		SendRoomEnterResult(sessionIndex, sessionUniqueID, -1,0, makeDataResult)
+		return makeDataResult
 	}
-	newUser, addResult := room.AddUser(userInfo)
+	newUser, addResult := room.AddUser(addUserInfo)
 
 
 	if addResult != protocol.ERROR_CODE_NONE {
 		SendRoomEnterResult(sessionIndex, sessionUniqueID, -1,0, addResult)
 		return addResult
 	}
-
 
 	NetLib.NTELIB_LOG_DEBUG("[Room.PacketProcess EnterUser] - requestPacket.RoomNumber:", zap.Int32("roomNumPacket",roomNumber ))
 	NetLib.NTELIB_LOG_DEBUG("[Room.PacketProcess EnterUser] - room.GetNumber():", zap.Int32("roomNumGetFunc", room.GetNumber() ))
@@ -52,7 +46,7 @@ func (room *BaseRoom) PacketProcess_EnterUser(inValidUser *RoomUser, packet prot
 	//Client측에서 RoomEnterResponse를 받게되면, GameRoom화면을 띄우며 그에 따른 처리를 한다. 따라서 아래의 패킷전송이 먼저 되어야한다.
 	SendRoomEnterResult(sessionIndex, sessionUniqueID, roomNumber, newUser.RoomUniqueID, protocol.ERROR_CODE_NONE)
 
-	// 그 이후 Room에 남아있는 패킷의 정보를 보낸다.
+	// 그 이후 Room에 다른 유저가 이미있다면 그 정보를 보낸다.
 	if room.GetCurrentUserCount() > 1 {
 		room.SendNewUserInfoPacket(newUser)
 		room.SendUserInfoListPacket(newUser)
@@ -80,7 +74,7 @@ func SendRoomEnterResult(sessionIndex int32, sessionUniqueID uint64, roomNumber 
 func (room *BaseRoom) SendUserInfoListPacket(user *RoomUser){
 	NetLib.NTELIB_LOG_DEBUG("Room SendUserInfoListPacket", zap.Uint64("SessionUniqueID", user.NetSessionUniqueID))
 
-	userCount, userInfoListSize, userInfoListBuffer := room.AllocAllUserInfo(user.NetSessionUniqueID)
+	userCount, userInfoListSize, userInfoListBuffer := room.GetAllUserInfoBuffer(user.NetSessionUniqueID)
 
 	var response protocol.RoomUserListNotifyPacket
 	response.UserCount = userCount
@@ -95,7 +89,7 @@ func (room *BaseRoom) SendUserInfoListPacket(user *RoomUser){
 func (room *BaseRoom) SendNewUserInfoPacket(user *RoomUser){
 	NetLib.NTELIB_LOG_DEBUG("Room SendNewUserInfoPakcet", zap.Uint64("SessionUniqueID", user.NetSessionUniqueID))
 
-	userInfoSize, userInfoListBuffer := room.AllocUserInfo(user)
+	userInfoSize, userInfoListBuffer := room.GetUserInfoBuffer(user)
 
 	var response protocol.RoomNewUserNotifyPacket
 	response.User = userInfoListBuffer
@@ -127,7 +121,7 @@ func (room *BaseRoom) LeaveUserProcess(user *RoomUser)  {
 	roomUserUniqueID := user.RoomUniqueID
 	userSessionIndex := user.NetSessionIndex
 	userSessionUniqueID := user.NetSessionUniqueID
-
+	
 	room.RemoveUser(user)
 	room.SendRoomLeaveUserNotify(roomUserUniqueID,userSessionUniqueID )
 
@@ -157,8 +151,8 @@ func (room *BaseRoom) SendRoomLeaveUserNotify(roomUserUniqueID uint64, userSessi
 
 
 func (room *BaseRoom) PacketProcess_Chat(user *RoomUser, packet protocol.Packet) int16{
-	sessionIndex := packet.UserSessionIndex
-	sessionUniqueID := packet.UserSessionUniqueID
+	sessionIndex := packet.RequestSessionIndex
+	sessionUniqueID := packet.RequestSessionUniqueID
 
 	var chatPacket protocol.RoomChatRequestPacket
 	if chatPacket.Decoding(packet.Data) == false {

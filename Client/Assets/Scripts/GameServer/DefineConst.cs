@@ -66,6 +66,13 @@ namespace GameNetwork
     }
 
 
+    public enum GAME_USER_STATUS : Int16
+    {
+        NONE = 1,
+        READY = 2,
+        GAME = 3,
+    }
+
     public enum GAME_RESULT : Int16
     {
         WIN = 1,

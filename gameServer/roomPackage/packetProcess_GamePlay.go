@@ -16,11 +16,9 @@ func (room *BaseRoom) PacketProcess_GameReadyRequest(user *RoomUser, packet prot
 	if user.Status==USER_STATUS_NONE {
 		NetLib.NTELIB_LOG_DEBUG("[PacketProcess_GameReadyRequest] user.Status is set to ready");
 		user.Status = USER_STATUS_READY
-		room.ReadyUserCount++
 	}else if user.Status==USER_STATUS_READY{
 		NetLib.NTELIB_LOG_DEBUG("[PacketProcess_GameReadyRequest] user.Status is set to none");
 		user.Status = USER_STATUS_NONE
-		room.ReadyUserCount--
 	}
 
 	notifyPacket.UserStatus = user.Status
@@ -29,13 +27,13 @@ func (room *BaseRoom) PacketProcess_GameReadyRequest(user *RoomUser, packet prot
 	room.BroadCastPacket(packetSize, notifySendBuf, 0)
 
 
-	if(room.ReadyUserCount==2){
+	if(room.CurUserCount > 1 && room.CheckAllUserIsReady()==true){
 		//게임시작 알림패킷 보내기
 		NetLib.NTELIB_LOG_DEBUG("[PacketProcess_GameReadyRequest] GAME START!");
 		var startPacket protocol.GameStartNotifyPacket
 		notifySendBuf, packetSize :=  startPacket.EncodingPacket()
 		room.BroadCastPacket(packetSize, notifySendBuf, 0)
-		
+
 		//TODO: User의 상태값을 GAME으로 변경하기
 	}
 	
@@ -71,8 +69,8 @@ func (room *BaseRoom) PacketProcess_Game_Sync_Req(user *RoomUser, packet protoco
 
 
 func (room *BaseRoom) PacketProcess_GameEndRequest(user *RoomUser, packet protocol.Packet) int16{
-	sessionIndex := packet.UserSessionIndex
-	sessionUniqueID := packet.UserSessionUniqueID
+	sessionIndex := packet.RequestSessionIndex
+	sessionUniqueID := packet.RequestSessionUniqueID
 
 	//TODO: 임시로 요청에 대한 응답을 모두 ERROR_CODE_NONE으로 하였는데 이후 예외상황에 따라 오류를 반환하는 경우가 추가될 수 있음
 	SendGameEndResult(sessionIndex, sessionUniqueID , protocol.ERROR_CODE_NONE)

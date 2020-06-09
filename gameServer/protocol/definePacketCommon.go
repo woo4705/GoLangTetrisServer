@@ -33,17 +33,14 @@ type Header struct {
 }
 
 type Packet struct {
-	UserSessionIndex	int32
-	UserSessionUniqueID	uint64
-	ID					int16
-	DataSize			int16
-	Data				[]byte
+	RequestSessionIndex		int32
+	RequestSessionUniqueID	uint64
+	ID						int16
+	DataSize				int16
+	Data					[]byte
 }
 
 
-func (packet Packet) GetSessionInfo() (int32,uint64){
-	return packet.UserSessionIndex, packet.UserSessionUniqueID
-}
 
 var public_clientSessionHeaderSize int16
 var public_serverSessionHeaderSize int16
@@ -74,7 +71,6 @@ func PeekPacketID(rawData []byte) int16{
 }
 
 func PeekPacketBody(rawData []byte) (bodySize int16, refBody []byte){
-
 	headerSize := ClientHeaderSize()
 	//totalSize := int16(binary.LittleEndian.Uint16(rawData))
 	bodyData := rawData[headerSize:]
