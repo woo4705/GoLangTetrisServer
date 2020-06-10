@@ -251,13 +251,3 @@ func (room *BaseRoom) IsDisconnectedUser(sessionUniqueID uint64) int16 {
 	return  protocol.ERROR_CODE_NONE
 }
 
-
-
-func (room *BaseRoom) CheckAllUserIsReady() bool{
-	for _, user := range room.UserSessionUniqueIDMap {
-		if user.Status != USER_STATUS_READY{
-			return false
-		}
-	}
-	return true
-}
