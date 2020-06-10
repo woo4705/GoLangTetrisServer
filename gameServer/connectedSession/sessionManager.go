@@ -114,7 +114,7 @@ func SetLogin(sessionIndex int32, sessionUniqueID uint64, userID string, curTime
 		return false
 	}
 
-	sessionManager.SessionList[sessionIndex].SetUser(sessionUniqueID, userID, curTimeSec)
+	sessionManager.SessionList[sessionIndex].SetUser(sessionUniqueID, userID)
 	sessionManager.UserIDSessionMap.Store(userID, sessionManager.SessionList[sessionIndex])
 
 	atomic.AddInt32(&sessionManager.CurrentLoginUserCount, 1)
@@ -141,7 +141,7 @@ func SetRoomNumber(sessionIndex int32, sessionUniqueID uint64, roomNum int32, cu
 		return false
 	}
 
-	return sessionManager.SessionList[sessionIndex].SetRoomNumber(sessionUniqueID, roomNum, curTimeSec)
+	return sessionManager.SessionList[sessionIndex].SetRoomNumber(sessionUniqueID, roomNum)
 }
 
 func GetRoomNumber(sessionIndex int32) (int32, int32){

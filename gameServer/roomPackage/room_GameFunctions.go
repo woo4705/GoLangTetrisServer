@@ -5,16 +5,6 @@ import (
 	NetLib "gohipernetFake"
 )
 
-func (room *BaseRoom) CheckAllUserIsReady() bool{
-	for _, user := range room.UserSessionUniqueIDMap {
-		if user.Status != USER_STATUS_READY{
-			return false
-		}
-	}
-	return true
-}
-
-
 
 func (room *BaseRoom)SetUserStatus(user *RoomUser, status int16) {
 	NetLib.NTELIB_LOG_DEBUG("User status is changed",zap.Int16("Status", status));
@@ -28,4 +18,19 @@ func (room *BaseRoom)SetAllUserStatus(status int16) {
 	for _, user := range room.UserSessionUniqueIDMap {
 		user.Status = status
 	}
+}
+
+
+func (room *BaseRoom)CheckGameStartCondition() bool{
+	if room.CurUserCount < 2 {
+		return false
+	}
+
+	for _, user := range room.UserSessionUniqueIDMap {
+		if user.Status != USER_STATUS_READY{
+			return false
+		}
+	}
+
+	return true
 }

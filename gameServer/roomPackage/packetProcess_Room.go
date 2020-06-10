@@ -121,7 +121,7 @@ func (room *BaseRoom) LeaveUserProcess(user *RoomUser)  {
 	roomUserUniqueID := user.RoomUniqueID
 	userSessionIndex := user.NetSessionIndex
 	userSessionUniqueID := user.NetSessionUniqueID
-	
+
 	room.RemoveUser(user)
 	room.SendRoomLeaveUserNotify(roomUserUniqueID,userSessionUniqueID )
 
