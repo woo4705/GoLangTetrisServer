@@ -59,8 +59,6 @@ public class GameSceneManager : MonoBehaviour
         UI_IsReadyRemotePlayer(false);
 
         isGameStart = false;
-        //GameObject.Find("ReadyButton").GetComponent<Button>().interactable = true;
-        //GameObject.Find("LeaveButton").GetComponent<Button>().interactable = true;
 
     }
 

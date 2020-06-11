@@ -112,6 +112,19 @@ func (room *BaseRoom) PacketProcess_LeaveUser(user *RoomUser, packet protocol.Pa
 
 	SendRoomLeaveResult(userSessionIndex, userSessionUniqueID, protocol.ERROR_CODE_NONE )
 
+	if(user.Status == USER_STATUS_GAME){
+		gameEndPacket := protocol.Packet{
+			userSessionIndex ,
+			userSessionUniqueID,
+			protocol.PACKET_ID_GAME_END_REQ,
+			0,
+			nil,
+		}
+
+		room.PacketProcess_GameEndRequest(user, gameEndPacket)
+	}
+
+
 	return protocol.ERROR_CODE_NONE
 }
 

@@ -151,7 +151,6 @@ namespace GameNetwork
             GameSceneManager.isRemoteUserInfoNeedUpdate = true;
             GameSceneManager.isRemoteReadyOFF_MsgArrived = true;
 
-
         }
         
         
