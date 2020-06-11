@@ -177,6 +177,19 @@ namespace GameNetwork
     }
 
 
+    public class RoomLeaveNtfPacket
+    {
+        public UInt64 RoomUserUniqueID = (UInt64)DUMMY_ROOM_USER_ID.VALUE;
+
+        public bool FromBytes(byte[] bodyData)
+        {
+            RoomUserUniqueID = BitConverter.ToUInt64(bodyData, 0);
+            return true;
+        }
+    }
+    
+
+
     public class RoomChatReqPacket
     {
         Int16 MsgLen;

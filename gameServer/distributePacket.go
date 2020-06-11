@@ -63,7 +63,7 @@ func (server *GameServer) PacketProcess_goroutine_Impl() bool {
 		}else if packet.ID == protocol.PACKET_ID_SESSION_CLOSE_SYS {
 			ProcessPacketSesssionClosed(server, sessionIndex, sessionUniqueID)
 		}else {
-			roomNumber,_ := connectedSession.GetRoomNumber(sessionIndex)
+			roomNumber := connectedSession.GetRoomNumber(sessionIndex)
 			server.RoomMgr.PacketProcess(roomNumber, packet)
 		}
 	}
@@ -126,9 +126,7 @@ func ProcessRoomEnterRequest(server *GameServer, sessionIndex int32, sessionUniq
 	enterRoomNum := server.RoomMgr.GetEmptyRoomToEnter()
 	room := server.RoomMgr.GetRoomByNumber(enterRoomNum)
 
-	//packet
 	room.PacketProcess_EnterUser(packet)
-
 
 }
 
@@ -144,7 +142,7 @@ func ProcessPacketSesssionClosed(server *GameServer, sessionIndex int32, session
 		return
 	}
 
-	roomNumber,_ := connectedSession.GetRoomNumber(sessionIndex)
+	roomNumber := connectedSession.GetRoomNumber(sessionIndex)
 
 
 	if roomNumber > -1 {

@@ -13,16 +13,19 @@ public class GameSceneManager : MonoBehaviour
 
     public static bool isRemoteUserInRoom { get; set; } = false;
     public static bool isLocalUserInfoNeedUpdate { get; set; } = false;
-    public static bool isRemoteUserInfoNeedUpdate { get;set;} =  false;
+    public static bool isRemoteUserInfoNeedUpdate { get;set;} =  true;
     
     public static bool isLocalReadyON_MsgArrived { get;set;} =  false;
     public static bool isRemoteReadyON_MsgArrived { get;set;} =  false;
     
     public static bool isLocalReadyOFF_MsgArrived { get;set;} =  false;
     public static bool isRemoteReadyOFF_MsgArrived { get;set;} =  false;
+
+
+    public static RoomLeaveNtfPacket roomLeaveNtfPkt;
     public static RoomLeaveResPacket roomLeaveResPkt;
     
-
+    
     private GameNetworkServer gameServer;
     private ErrorMsgBox errorMsgBox;
 
@@ -36,6 +39,7 @@ public class GameSceneManager : MonoBehaviour
         chattingLog.text = "";
         
         roomLeaveResPkt = new RoomLeaveResPacket();
+        roomLeaveNtfPkt = new RoomLeaveNtfPacket();
 
         errorMsgBox = gameObject.AddComponent<ErrorMsgBox>();
         if (errorMsgBox != null)
@@ -53,6 +57,10 @@ public class GameSceneManager : MonoBehaviour
 
         UI_IsReadyLocalPlayer(false);
         UI_IsReadyRemotePlayer(false);
+
+        isGameStart = false;
+        //GameObject.Find("ReadyButton").GetComponent<Button>().interactable = true;
+        //GameObject.Find("LeaveButton").GetComponent<Button>().interactable = true;
 
     }
 
@@ -107,7 +115,10 @@ public class GameSceneManager : MonoBehaviour
             GameNetworkServer.UserData userData =
                 GameNetworkServer.Instance.GetRemoteUserInfo();
             UI_SetRemotePlayerInfo(userData.ID);
+            
+            
             isRemoteUserInfoNeedUpdate = false;
+            
         }
 
 
@@ -145,12 +156,10 @@ public class GameSceneManager : MonoBehaviour
         }
 
     }
-    
-    
-    
 
-    
-    
+
+
+    //UI 라벨표시 부분 관련
     public void UI_SetLocalPlayerInfo(string UserID)
     {
  
@@ -176,10 +185,7 @@ public class GameSceneManager : MonoBehaviour
         }
     }
 
-    
-
-
-     void UI_IsReadyLocalPlayer(bool is_on)
+    void UI_IsReadyLocalPlayer(bool is_on)
      {
          if (is_on)
          {
@@ -205,6 +211,8 @@ public class GameSceneManager : MonoBehaviour
      
      
      
+     
+     //UI 버튼클릭 이벤트 관련
     public void OnClickMsgSendButton()
     {
         string message="";
@@ -253,6 +261,7 @@ public class GameSceneManager : MonoBehaviour
     }
     
     
+    // 에러메시지 처리 관련
     public void CloseErrorMsg()
     {
         errorMsgBox.SetInactive();
@@ -261,6 +270,8 @@ public class GameSceneManager : MonoBehaviour
         roomLeaveResPkt.Result = ERROR_CODE.DUMMY_CODE;
     } 
 
-
-
+    
+    
+    
+    
 }

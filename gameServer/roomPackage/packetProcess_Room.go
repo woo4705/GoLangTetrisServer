@@ -141,7 +141,7 @@ func SendRoomLeaveResult(sessionIndex int32, sessionUniqueID uint64, result int1
 func (room *BaseRoom) SendRoomLeaveUserNotify(roomUserUniqueID uint64, userSessionUniqueID uint64) {
 	NetLib.NTELIB_LOG_DEBUG("Room SendRoomLeaveUserNotify", zap.Uint64("SessionUniqueID", userSessionUniqueID), zap.Int32("RoomIndex", room.Index) )
 
-	notifyPacket := protocol.RoomLeaveUserNotifyPacket{UserUniqueID: roomUserUniqueID}
+	notifyPacket := protocol.RoomLeaveUserNotifyPacket{RoomUserUniqueID: roomUserUniqueID}
 	sendBuf, packetSize := notifyPacket.EncodingPacket()
 	room.BroadCastPacket(int16(packetSize), sendBuf, userSessionUniqueID)
 }

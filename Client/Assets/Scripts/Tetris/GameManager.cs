@@ -53,6 +53,9 @@ public class GameManager : MonoBehaviour {
         if (isGameOverNtfArrived == true)
         {
             GameOverFn(GameResult);
+            StartCoroutine(
+                CountDownToContinue(GameObject.Find("Countdown_Text").GetComponent<Text>(), 3)
+                );
             isGameOverNtfArrived = false;
         }
     }
@@ -102,7 +105,7 @@ public class GameManager : MonoBehaviour {
         Instantiate(GameOverPanel[0], new Vector2(0,0),Quaternion.identity);
         GameObject gameOverPanel = GameObject.Find("GameOverPanel(Clone)");
         gameOverPanel.transform.parent = gameUI.transform;
-        gameOverPanel.transform.SetPositionAndRotation(new Vector2(920, 500), Quaternion.identity);
+        gameOverPanel.transform.SetPositionAndRotation(new Vector2(650, 350), Quaternion.identity);
         
         
         GameObject gameOverText = GameObject.Find("WIN_or_LOSE");
@@ -115,6 +118,39 @@ public class GameManager : MonoBehaviour {
         {
             gameOverText.GetComponent<Text>().text = "YOU LOSE...";
         }
-        
+
     }
+    
+    
+
+    IEnumerator CountDownToContinue(Text countdownText, float waitSecond)
+    {
+        if (!countdownText)
+        {
+            yield return null;
+        }
+
+        float accurated_time = 0;
+        int remain_time = (int)waitSecond;
+
+        
+        while (accurated_time <= waitSecond)
+        {
+            accurated_time += Time.deltaTime;
+            Debug.Log("accurated_time: "+accurated_time);
+            remain_time = (int) (waitSecond - accurated_time);
+            
+            Debug.Log("accurated_time: "+accurated_time);
+            
+            countdownText.text = "CONTINUE..."+(remain_time+1);
+            yield return null;
+
+        }
+
+        GameSceneManager.isRemoteUserInfoNeedUpdate = true;
+        SceneManager.LoadScene("Game");
+        yield break;
+
+    }
+
 }

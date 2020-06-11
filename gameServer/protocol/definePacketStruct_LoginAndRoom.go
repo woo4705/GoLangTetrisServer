@@ -190,36 +190,6 @@ func (packet RoomNewUserNotifyPacket) EncodingPacket(userInfoSize int16) ([]byte
 
 
 
-
-//RoomLeaveNotifyPacket
-type RoomLeaveUserNotifyPacket struct{
-	UserUniqueID uint64
-}
-
-func (packet RoomLeaveUserNotifyPacket) EncodingPacket() ([]byte, int16){
-	totalPacketSize := public_clientSessionHeaderSize + 8
-	sendBuf := make([]byte,totalPacketSize)
-
-	writer := NetLib.MakeWriter(sendBuf,true)
-	EncodingPacketHeader(&writer,totalPacketSize,PACKET_ID_ROOM_LEAVE_USER_NTF,0)
-
-	writer.WriteU64(packet.UserUniqueID)
-	return sendBuf, totalPacketSize
-}
-
-func (packet RoomLeaveUserNotifyPacket) Decoding(bodyData []byte)bool {
-	bodySize := NetLib.Sizeof(reflect.TypeOf(packet))
-	if len(bodyData) != bodySize {
-		return false
-	}
-
-	reader := NetLib.MakeReader(bodyData, true)
-	packet.UserUniqueID,_ = reader.ReadU64()
-	return true
-}
-
-
-
 //RoomLeaveResponse Packet
 type RoomLeaveUserResponsePacket struct{
 	Result int16
@@ -241,6 +211,37 @@ func (packet *RoomLeaveUserResponsePacket) Decoding(bodyData []byte) bool {
 	packet.Result,_ =  reader.ReadS16()
 	return true
 }
+
+
+//RoomLeaveNotifyPacket
+type RoomLeaveUserNotifyPacket struct{
+	RoomUserUniqueID uint64
+}
+
+
+func (packet RoomLeaveUserNotifyPacket) EncodingPacket() ([]byte, int16){
+	totalPacketSize := public_clientSessionHeaderSize + 8
+	sendBuf := make([]byte,totalPacketSize)
+
+	writer := NetLib.MakeWriter(sendBuf,true)
+	EncodingPacketHeader(&writer,totalPacketSize,PACKET_ID_ROOM_LEAVE_USER_NTF,0)
+
+	writer.WriteU64(packet.RoomUserUniqueID)
+	return sendBuf, totalPacketSize
+}
+
+func (packet RoomLeaveUserNotifyPacket) Decoding(bodyData []byte)bool {
+	bodySize := NetLib.Sizeof(reflect.TypeOf(packet))
+	if len(bodyData) != bodySize {
+		return false
+	}
+
+	reader := NetLib.MakeReader(bodyData, true)
+	packet.RoomUserUniqueID,_ = reader.ReadU64()
+	return true
+}
+
+
 
 
 

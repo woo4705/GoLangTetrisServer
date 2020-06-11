@@ -21,7 +21,7 @@ namespace GameNetwork
         
         ROOM_LEAVE_REQ = 726,
         ROOM_LEAVE_RES = 727,
-        ROOM_LEAVE_USER_NTF = 728,
+        ROOM_LEAVE_NTF = 728,
         
         ROOM_CHAT_REQ = 731,
         ROOM_CHAT_NTF = 733,
@@ -66,6 +66,12 @@ namespace GameNetwork
     }
 
 
+    public enum DUMMY_ROOM_USER_ID : UInt64
+    {
+        VALUE = 0
+    }
+    
+    
     public enum GAME_USER_STATUS : Int16
     {
         NONE = 1,

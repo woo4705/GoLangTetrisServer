@@ -19,7 +19,7 @@ public class LoginSceneManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        Screen.SetResolution(1920,1080,false);
+        Screen.SetResolution(1366,768,false);
         gameServer = GameNetworkServer.Instance;
         errorMsgBox = gameObject.AddComponent<ErrorMsgBox>();
 
@@ -66,12 +66,12 @@ public class LoginSceneManager : MonoBehaviour
     public void SendLoginRequest()
     {
         var InputID = (GameObject.Find("input_id_field")).GetComponent<InputField>().text;
-        var InputPW = (GameObject.Find("input_pw_field")).GetComponent<InputField>().text;
+       // var InputPW = (GameObject.Find("input_pw_field")).GetComponent<InputField>().text;
         var InputIPAddr = (GameObject.Find("input_ip_addr_field")).GetComponent<InputField>().text;
 
         GameNetworkServer.Instance.ipAddr = InputIPAddr;
         var request = new LoginReqPacket();
-        request.SetValue(InputID, InputPW);
+        request.SetValue(InputID, InputID);
         var bodyData = request.ToBytes();
 
         if (gameServer.ClientStatus == GameNetworkServer.CLIENT_STATUS.NONE)
@@ -82,7 +82,7 @@ public class LoginSceneManager : MonoBehaviour
                 GameNetworkServer.Instance.ConnectToServer();
             }
 
-            GameNetworkServer.Instance.RequestLogin(InputID, InputPW);
+            GameNetworkServer.Instance.RequestLogin(InputID, InputID);
         }
 
         isLoginReqPktSended = true;

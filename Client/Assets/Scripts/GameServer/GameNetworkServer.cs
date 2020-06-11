@@ -144,6 +144,7 @@ namespace GameNetwork
         }
 
 
+        //TODO: 해당함수 손보기(원격 접속된 유저없을때 아래 구조인데 메모리릭 없는지 확인
         public UserData GetRemoteUserInfo()
         {
             foreach (var roomUser in RoomUserInfo)
@@ -153,8 +154,12 @@ namespace GameNetwork
                     return roomUser.Value;
                 }
             }
+            
+            UserData emptyUser = new UserData();
+            emptyUser.ID = "[]";
+            emptyUser.Status = (Int16)CLIENT_STATUS.NONE;
 
-            return new UserData();
+            return emptyUser;
         }
         
         

@@ -50,7 +50,6 @@ func (room *BaseRoom) PacketProcess_Game_Sync_Req(user *RoomUser, packet protoco
 	notifyPacket.Line = requestPacket.Line
 	notifyPacket.Level = requestPacket.Level
 
-
 	sendBuf, packetSize := notifyPacket.EncodingPacket()
 
 	//방에있는 다른 유저 가져오기
@@ -73,6 +72,19 @@ func (room *BaseRoom) PacketProcess_GameEndRequest(user *RoomUser, packet protoc
 	ntfPacket_Win.GameResult = protocol.GAME_RESULT_WIN
 	ntfWinPktBuf, packetSize := ntfPacket_Win.EncodingPacket()
 	room.BroadCastPacket(packetSize, ntfWinPktBuf, sessionUniqueID)
+
+	//TODO: 게임 종료후 상태가 NONE으로 변경되었음을 알림
+	room.SetAllUserStatus(USER_STATUS_NONE);
+
+	var ntfPacket_UserStatus protocol.GameUserStatusNotifyPacket
+	for _, user := range room.UserSessionUniqueIDMap {
+		ntfPacket_UserStatus.RoomUserUniqueID= user.RoomUniqueID;
+		ntfPacket_UserStatus.UserStatus = user.Status;
+
+		ntfUserStatusBuf, packetSize := ntfPacket_UserStatus.EncodingPacket()
+		room.BroadCastPacket(packetSize, ntfUserStatusBuf, 0)
+	}
+
 
 	return protocol.ERROR_CODE_NONE
 

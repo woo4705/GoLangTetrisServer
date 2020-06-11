@@ -52,6 +52,12 @@ namespace GameNetwork
                         break;
                     }
 
+                case PACKET_ID.ROOM_LEAVE_NTF:
+                    {
+                        ProcessLeaveRoomNotify(packet);
+                        break;
+                    }
+
                 case PACKET_ID.GAME_START_NTF:
                     {
                         ProcessGameStartNotify(packet);
@@ -135,7 +141,17 @@ namespace GameNetwork
 
         static void ProcessLeaveRoomNotify(PacketData packet)
         {
+            var notify = GameSceneManager.roomLeaveNtfPkt;
+            notify.FromBytes(packet.BodyData);
             
+            Debug.Log("다른 유저의 퇴장 알림패킷을 받음");
+            
+            //TODO: GameNetworkServer에서 Room안의 Remote User정보를 지운다.
+            GameNetworkServer.Instance.DeleteUserInfo(notify.RoomUserUniqueID);
+            GameSceneManager.isRemoteUserInfoNeedUpdate = true;
+            GameSceneManager.isRemoteReadyOFF_MsgArrived = true;
+
+
         }
         
         
@@ -285,6 +301,17 @@ namespace GameNetwork
             Debug.Log("GameManager.Instance.GameResult:"+GameManager.Instance.GameResult);
             
             GameManager.Instance.isGameOverNtfArrived = true;
+            GameNetworkServer.Instance.ClientStatus = GameNetworkServer.CLIENT_STATUS.ROOM;
+
+            /*
+             GameNetworkServer.UserData localUser =  GameNetworkServer.Instance.RoomUserInfo[GameNetworkServer.Instance.Local_RoomUserUniqueID];
+             
+              GameNetworkServer.UserData remoteUser = GameNetworkServer.Instance.GetRemoteUserInfo();
+  
+              localUser.Status = (Int16)GAME_USER_STATUS.NONE;
+              remoteUser.Status = (Int16)GAME_USER_STATUS.NONE;
+              
+              */
 
         }
     }
