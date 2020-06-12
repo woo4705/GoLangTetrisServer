@@ -112,28 +112,24 @@ public class ShadowGrid : MonoBehaviour
             case EVENT_TYPE.SPAWN_GROUP_O:
                 {
                     SpawnShadow(shadowgroups[(int)EVENT_TYPE.SPAWN_GROUP_O]);
-                    Debug.Log("Spawm O");
                     break;
                 }
 
             case EVENT_TYPE.SPAWN_GROUP_S:
                 {
                     SpawnShadow(shadowgroups[(int)EVENT_TYPE.SPAWN_GROUP_S]);
-                    Debug.Log("Spawm S");
                     break;
                 }
 
             case EVENT_TYPE.SPAWN_GROUP_T:
                 {
                     SpawnShadow(shadowgroups[(int)EVENT_TYPE.SPAWN_GROUP_T]);
-                    Debug.Log("Spawm T");
                     break;
                 }
 
             case EVENT_TYPE.SPAWN_GROUP_Z:
                 {
                     SpawnShadow(shadowgroups[(int)EVENT_TYPE.SPAWN_GROUP_Z]);
-                    Debug.Log("Spawm Z");
                     break;
                 }
 
