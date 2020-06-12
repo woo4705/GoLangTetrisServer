@@ -101,6 +101,8 @@ public class GameManager : MonoBehaviour {
     {
         Debug.Log("GameOverFn() fired!");
 
+        Group.ClearRecordDataInSyncPacket();
+        
         GameObject gameUI = GameObject.FindGameObjectWithTag("gsui");
         Instantiate(GameOverPanel[0], new Vector2(0,0),Quaternion.identity);
         GameObject gameOverPanel = GameObject.Find("GameOverPanel(Clone)");
@@ -137,10 +139,7 @@ public class GameManager : MonoBehaviour {
         while (accurated_time <= waitSecond)
         {
             accurated_time += Time.deltaTime;
-            Debug.Log("accurated_time: "+accurated_time);
             remain_time = (int) (waitSecond - accurated_time);
-            
-            Debug.Log("accurated_time: "+accurated_time);
             
             countdownText.text = "CONTINUE..."+(remain_time+1);
             yield return null;

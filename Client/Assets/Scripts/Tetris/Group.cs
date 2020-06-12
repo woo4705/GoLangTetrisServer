@@ -16,15 +16,14 @@ public class Group : MonoBehaviour
 {
     // Time since last gravity tick
     public Single lastFall = 0;
-    public Single lastSecond = 0;
     public static Single lastSendPacket = 0;
     private Single SyncPacketInterval;
     private static Single TimeCapture = 0;
     public static int RecordIdx { get; set; } = 0;
-    public Int16 blockType { get; set; } = -1;
+
     private static GameSynchronizePacket synchronizePacket { get; set; }
 
-    public ShadowGroup MyShadow; 
+ 
     void Start()
     {
         SyncPacketInterval = GameNetworkServer.Instance.SyncPacketInterval;
@@ -49,43 +48,43 @@ public class Group : MonoBehaviour
             {
                 case 'I':
                     {
-                        EnqueueEventToSyncPacket(TimeCapture, (Int16)EVENT_TYPE.SPAWN_GROUP_I);
+                        EnqueueEventToSyncPacket((Int16)EVENT_TYPE.SPAWN_GROUP_I);
                         break;
                     }
 
                 case 'J':
                     {
-                        EnqueueEventToSyncPacket(TimeCapture, (Int16)EVENT_TYPE.SPAWN_GROUP_J);
+                        EnqueueEventToSyncPacket((Int16)EVENT_TYPE.SPAWN_GROUP_J);
                         break;
                     }
 
                 case 'L':
                     {
-                        EnqueueEventToSyncPacket(TimeCapture, (Int16)EVENT_TYPE.SPAWN_GROUP_L);
+                        EnqueueEventToSyncPacket((Int16)EVENT_TYPE.SPAWN_GROUP_L);
                         break;
                     } 
 
                 case 'O':
                     {
-                        EnqueueEventToSyncPacket(TimeCapture, (Int16)EVENT_TYPE.SPAWN_GROUP_O);
+                        EnqueueEventToSyncPacket((Int16)EVENT_TYPE.SPAWN_GROUP_O);
                         break;
                     }
 
                 case 'S':
                     {
-                        EnqueueEventToSyncPacket(TimeCapture, (Int16)EVENT_TYPE.SPAWN_GROUP_S);
+                        EnqueueEventToSyncPacket((Int16)EVENT_TYPE.SPAWN_GROUP_S);
                         break;
                     }
 
                 case 'T':
                     {
-                        EnqueueEventToSyncPacket(TimeCapture, (Int16)EVENT_TYPE.SPAWN_GROUP_T);
+                        EnqueueEventToSyncPacket((Int16)EVENT_TYPE.SPAWN_GROUP_T);
                         break;
                     }
 
                 case 'Z':
                     {
-                        EnqueueEventToSyncPacket(TimeCapture, (Int16)EVENT_TYPE.SPAWN_GROUP_Z);
+                        EnqueueEventToSyncPacket((Int16)EVENT_TYPE.SPAWN_GROUP_Z);
                         break;
                     }
             }
@@ -95,17 +94,14 @@ public class Group : MonoBehaviour
     }
 
 
-    public void EnqueueEventToSyncPacket(Single TimeCapture, Int16 EventType)
+    public void EnqueueEventToSyncPacket( Int16 EventType)
     {
         synchronizePacket.EventRecordArr[RecordIdx++] = EventType;
     }
 
 
-
-    // Update is called once per frame
-    void Update()
+    void SendSyncPacket()
     {
-
         if (Time.time - lastSendPacket >= SyncPacketInterval) //설정된 동기화패킷 설정 간격마다 데이터를 보낸다.
         {
             lock (synchronizePacket)
@@ -123,6 +119,30 @@ public class Group : MonoBehaviour
             }
 
         }
+    }
+
+
+// 게임졌을때 Sync패킷에 Spawn데이터를 기록하고있음. 그리고 뒤에 이어서 기록해서 전 판에서 스폰되는 게임블록이 그대로 나와 오류가 생긴다.
+    public static void ClearRecordDataInSyncPacket()
+    {
+        lock (synchronizePacket)
+        {
+            for (int i=0; i<6; i++)
+            {
+                synchronizePacket.EventRecordArr[i] = (Int16)EVENT_TYPE.NONE;
+            }
+            RecordIdx = 0;
+            
+            Debug.Log("Clear record data");
+        }
+    }
+    
+    
+    // Update is called once per frame
+    void Update()
+    {
+
+        SendSyncPacket();
 
             //FallSpeed called
         if (Time.time - lastFall >= GameManager.Instance.FallSpeed) {
@@ -133,14 +153,14 @@ public class Group : MonoBehaviour
             if (isValidGridPos()) {
                 // It's valid. Update grid.
                 updateGrid();
-                EnqueueEventToSyncPacket(Time.time, (Int16)EVENT_TYPE.MOVE_DOWN);
+                EnqueueEventToSyncPacket( (Int16)EVENT_TYPE.MOVE_DOWN);
             }
             else {
                 // It's not valid. revert.
                 transform.position += new Vector3(0, 1, 0);
                 // Clear filled horizontal lines
                 Grid.deleteFullRows();
-                EnqueueEventToSyncPacket(Time.time, (Int16)EVENT_TYPE.DELETE_ROW);
+                EnqueueEventToSyncPacket((Int16)EVENT_TYPE.DELETE_ROW);
                 // Spawn next Group
                 Debug.Log("Spawned (FallTime)");
                 FindObjectOfType<Spawner>().spawnNext();
@@ -161,7 +181,7 @@ public class Group : MonoBehaviour
 
             if (isValidGridPos())  {
                 updateGrid();
-                EnqueueEventToSyncPacket(Time.time, (Int16)EVENT_TYPE.MOVE_LEFT);
+                EnqueueEventToSyncPacket((Int16)EVENT_TYPE.MOVE_LEFT);
             }
             else {
                 transform.position += new Vector3(1, 0, 0);
@@ -177,7 +197,7 @@ public class Group : MonoBehaviour
 
             if (isValidGridPos())  {
                 updateGrid();
-                EnqueueEventToSyncPacket(Time.time, (Int16)EVENT_TYPE.MOVE_RIGHT);
+                EnqueueEventToSyncPacket((Int16)EVENT_TYPE.MOVE_RIGHT);
             }
             else {
                 transform.position += new Vector3(-1, 0, 0);
@@ -192,7 +212,7 @@ public class Group : MonoBehaviour
 
             if (isValidGridPos()) {
                 updateGrid();
-                EnqueueEventToSyncPacket(Time.time, (Int16)EVENT_TYPE.ROTATE);
+                EnqueueEventToSyncPacket((Int16)EVENT_TYPE.ROTATE);
             }
             else
                 transform.Rotate(0, 0, 90);
@@ -206,14 +226,14 @@ public class Group : MonoBehaviour
 
             if (isValidGridPos()) {
                 updateGrid();
-                EnqueueEventToSyncPacket(Time.time, (Int16)EVENT_TYPE.MOVE_DOWN);
+                EnqueueEventToSyncPacket((Int16)EVENT_TYPE.MOVE_DOWN);
             }
             else  {
                 transform.position += new Vector3(0, 1, 0);
 
                 // Clear filled horizontal lines
                 Grid.deleteFullRows();
-                EnqueueEventToSyncPacket(Time.time, (Int16)EVENT_TYPE.DELETE_ROW);
+                EnqueueEventToSyncPacket((Int16)EVENT_TYPE.DELETE_ROW);
                 Debug.Log("Spawned (KeyDown)");
                 FindObjectOfType<Spawner>().spawnNext();
 

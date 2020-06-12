@@ -167,6 +167,7 @@ namespace GameNetwork
             Debug.Log("[ProcessRoomUserListNotify] UserUniqueIdList[0]="+notify.UserStatusList[0]);
             
             GameNetworkServer.Instance.AddUserInfo(notify.UserUniqueIdList[0], notify.UserIDList[0], notify.UserStatusList[0]);
+            GameSceneManager.isRemoteUserInfoNeedUpdate = true;
             if (notify.UserStatusList[0] == (Int16) GAME_USER_STATUS.READY)
             {
                 GameSceneManager.isRemoteReadyON_MsgArrived = true;
@@ -262,17 +263,22 @@ namespace GameNetwork
         {
            var response = new GameStartNotifyPacket();
             GameNetworkServer.Instance.ClientStatus = GameNetworkServer.CLIENT_STATUS.GAME;
+            
+            ShadowGrid.RecvSyncPacketQueue.Clear();
             Spawner.isGameStart = true;
+            
+           
         }
 
         static void ProcessGameSyncNotify(PacketData packet)
         {
-            var response = new GameSynchronizeNotifyPacket();
-            response.FromBytes(packet.BodyData);
+            var notify = new GameSynchronizeNotifyPacket();
+            notify.FromBytes(packet.BodyData);
             
-            if (ShadowGrid.RecvSyncPacketQueue != null)
+            if (GameNetworkServer.Instance.ClientStatus == GameNetworkServer.CLIENT_STATUS.GAME && ShadowGrid.RecvSyncPacketQueue != null)
             {
-                ShadowGrid.RecvSyncPacketQueue.Enqueue(response);
+                Debug.Log("GameSyncPacketEnqueued");
+                ShadowGrid.RecvSyncPacketQueue.Enqueue(notify);
             }
         }
 
@@ -294,24 +300,18 @@ namespace GameNetwork
             var notify = new GameEndNotifyPacket();
             notify.FromBytes(packet.BodyData);
             
+            Spawner.isGameStart = false;
+            
             //아래의 부분을 main Thread에서 부르도록 수정하기
             GameManager.Instance.GameResult = (GAME_RESULT)notify.GameResult;
             
             Debug.Log("GameManager.Instance.GameResult:"+GameManager.Instance.GameResult);
             
             GameManager.Instance.isGameOverNtfArrived = true;
+            ShadowGrid.RecvSyncPacketQueue.Clear();
             GameNetworkServer.Instance.ClientStatus = GameNetworkServer.CLIENT_STATUS.ROOM;
 
-            /*
-             GameNetworkServer.UserData localUser =  GameNetworkServer.Instance.RoomUserInfo[GameNetworkServer.Instance.Local_RoomUserUniqueID];
-             
-              GameNetworkServer.UserData remoteUser = GameNetworkServer.Instance.GetRemoteUserInfo();
-  
-              localUser.Status = (Int16)GAME_USER_STATUS.NONE;
-              remoteUser.Status = (Int16)GAME_USER_STATUS.NONE;
-              
-              */
-
+          
         }
     }
 }

@@ -11,8 +11,6 @@ public class ShadowGrid : MonoBehaviour
 
     public ShadowGroup[] shadowgroups;
     GameSynchronizeNotifyPacket RecvSyncPacket;
-    public static Single GetPacketTime { get; set; } = 0;
-    Single PacketSimulTimeFrame = 0;
 
     //원격 클라이언트에서 블록이 Spawn되면 할당됨
     public static ShadowGroup RemoteShadow;
@@ -21,7 +19,14 @@ public class ShadowGrid : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        
+        EventProcessIdx = -1;
+        IsSimulating = false;
+        
+        Debug.Log("ShadowGrid is Started!!");
+        
         RecvSyncPacketQueue = new Queue<GameSynchronizeNotifyPacket>();
+        RecvSyncPacket = new GameSynchronizeNotifyPacket();
     }
 
     // Update is called once per frame
@@ -36,8 +41,9 @@ public class ShadowGrid : MonoBehaviour
                 return;
             }
 
-            PacketSimulTimeFrame = Time.time - GetPacketTime;
+
             EVENT_TYPE recordEventType = (EVENT_TYPE)RecvSyncPacket.EventRecordArr[EventProcessIdx];
+            
             while (recordEventType == EVENT_TYPE.NONE && EventProcessIdx < 6)
             {
                 EventProcessIdx++;
@@ -59,10 +65,12 @@ public class ShadowGrid : MonoBehaviour
         {
             if (RecvSyncPacketQueue != null && RecvSyncPacketQueue.Count > 0)
             {
+                
+                Debug.Log("Deque PacketSync");
+                
                 RecvSyncPacket = RecvSyncPacketQueue.Dequeue();
                 Text RivalScore = GameObject.FindGameObjectWithTag("RivalScore").GetComponent<Text>();
                 RivalScore.text = "Score: "+ RecvSyncPacket.Score+"\nLine: "+ RecvSyncPacket.Line+"\nLevel:"+ RecvSyncPacket.Level;
-                GetPacketTime = Time.time;
                 EventProcessIdx = 0;
                 IsSimulating = true;
             }
@@ -83,42 +91,49 @@ public class ShadowGrid : MonoBehaviour
             case EVENT_TYPE.SPAWN_GROUP_I:
                 {
                     SpawnShadow(shadowgroups[(int)EVENT_TYPE.SPAWN_GROUP_I]);
+                    Debug.Log("Spawm I");
                     break;
                 }
 
             case EVENT_TYPE.SPAWN_GROUP_J:
                 {
                     SpawnShadow(shadowgroups[(int)EVENT_TYPE.SPAWN_GROUP_J]);
+                    Debug.Log("Spawm J");
                     break;
                 }
 
             case EVENT_TYPE.SPAWN_GROUP_L:
                 {
                     SpawnShadow(shadowgroups[(int)EVENT_TYPE.SPAWN_GROUP_L]);
+                    Debug.Log("Spawm L");
                     break;
                 }
 
             case EVENT_TYPE.SPAWN_GROUP_O:
                 {
                     SpawnShadow(shadowgroups[(int)EVENT_TYPE.SPAWN_GROUP_O]);
+                    Debug.Log("Spawm O");
                     break;
                 }
 
             case EVENT_TYPE.SPAWN_GROUP_S:
                 {
                     SpawnShadow(shadowgroups[(int)EVENT_TYPE.SPAWN_GROUP_S]);
+                    Debug.Log("Spawm S");
                     break;
                 }
 
             case EVENT_TYPE.SPAWN_GROUP_T:
                 {
                     SpawnShadow(shadowgroups[(int)EVENT_TYPE.SPAWN_GROUP_T]);
+                    Debug.Log("Spawm T");
                     break;
                 }
 
             case EVENT_TYPE.SPAWN_GROUP_Z:
                 {
                     SpawnShadow(shadowgroups[(int)EVENT_TYPE.SPAWN_GROUP_Z]);
+                    Debug.Log("Spawm Z");
                     break;
                 }
 

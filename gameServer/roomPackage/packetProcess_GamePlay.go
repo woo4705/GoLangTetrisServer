@@ -43,6 +43,8 @@ func (room *BaseRoom) PacketProcess_Game_Sync_Req(user *RoomUser, packet protoco
 
 
 	var notifyPacket protocol.GameSyncNotifyPacket
+
+	//TODO: 하드코딩된 변수 상수값으로 변경하기
 	for i:=0; i<6; i++{
 		notifyPacket.EventRecordArr[i] = requestPacket.EventRecordArr[i]
 	}
@@ -73,7 +75,7 @@ func (room *BaseRoom) PacketProcess_GameEndRequest(user *RoomUser, packet protoc
 	ntfWinPktBuf, packetSize := ntfPacket_Win.EncodingPacket()
 	room.BroadCastPacket(packetSize, ntfWinPktBuf, sessionUniqueID)
 
-	//TODO: 게임 종료후 상태가 NONE으로 변경되었음을 알림
+	
 	room.SetAllUserStatus(USER_STATUS_NONE);
 
 	var ntfPacket_UserStatus protocol.GameUserStatusNotifyPacket
