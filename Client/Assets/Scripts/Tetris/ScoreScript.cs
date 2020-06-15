@@ -100,13 +100,16 @@ public class ScoreScript : MonoBehaviour
             
         }
         //FallSpeed set here
-        if (GameManager.Instance.GameLevel > 1 && GameManager.Instance.GameLevel <= 6)
+        if (GameManager.Instance.GameLevel > 1 && GameManager.Instance.GameLevel <= 3)
         {
             GameManager.Instance.FallSpeed = (10f - GameManager.Instance.GameLevel) * 0.1f;
+        }else if (GameManager.Instance.GameLevel > 4 && GameManager.Instance.GameLevel <= 6)
+        {
+            GameManager.Instance.FallSpeed = (10f - GameManager.Instance.GameLevel) * 0.1f+0.15f;
         }
         else if (GameManager.Instance.GameLevel >= 7 && GameManager.Instance.GameLevel <= 9)
         {
-            GameManager.Instance.FallSpeed = (10f - GameManager.Instance.GameLevel) * 0.1f + 0.05f;
+            GameManager.Instance.FallSpeed = (10f - GameManager.Instance.GameLevel) * 0.1f + 0.25f;
         }
         else if (GameManager.Instance.GameLevel == 10)
         {

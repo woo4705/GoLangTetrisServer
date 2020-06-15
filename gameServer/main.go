@@ -27,6 +27,7 @@ func ParseConfigData() (NetLib.NetworkConfig, ConfigAppServer)  {
 
 	netConfig := NetLib.NetworkConfig{}
 
+	//TODO: 아래의 값대신 실제로 설정되는것은 config파일의 값들이다.
 	flag.BoolVar(&netConfig .IsTcp4Addr, "c_IsTcp4Addr", true, "bool flag")
 	flag.StringVar(&netConfig .BindAddress, "c_BindAddress", "127.0.0.1:11021", "string flag")
 	flag.IntVar(&netConfig .MaxSessionCount, "c_MaxSessionCount", 0, "int flag")

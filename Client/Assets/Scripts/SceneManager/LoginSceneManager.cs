@@ -23,8 +23,8 @@ public class LoginSceneManager : MonoBehaviour
         gameServer = GameNetworkServer.Instance;
         errorMsgBox = gameObject.AddComponent<ErrorMsgBox>();
 
-        (GameObject.Find("input_ip_addr_field")).GetComponent<InputField>().text = "127.0.0.1";
-        
+        (GameObject.Find("input_ip_addr_field")).GetComponent<InputField>().text = "52.141.58.88";
+        (GameObject.Find("input_ip_addr_field")).GetComponent<InputField>().interactable = false;
         
         GameObject.Find("sign_up_btn").GetComponent<Button>().interactable = false;
 
